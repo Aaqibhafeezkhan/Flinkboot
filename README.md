@@ -67,7 +67,7 @@ public class MyFlinkJob {
 ## Documentation & References
 
 * **[Documentation](https://flinkboot.com)** — Official documentation and production guides.
-* **[Quickstart Template](https://github.com/Sekelenao/Flinkboot-Quickstart)** — Standalone runnable project with simulated streams, custom configurations, and live Web UI.
+* **[Quickstart Template](https://github.com/Sekelenao/Flinkboot-Quickstart)** — Standalone runnable project with simulated streams and live Web UI.
 * **[Contributing Guide](CONTRIBUTING.md)** — Guidelines for reporting issues, submitting pull requests, and coding standards.
 * **[Changelog](CHANGELOG.md)** — Release notes and user-facing change history.
 
