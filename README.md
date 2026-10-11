@@ -6,10 +6,7 @@
 Flinkboot
 </h1>
 
-> **The Bootstrapping & Reliability Framework for Apache Flink.** Fail fast on configuration, serialize natively without Kryo, and bootstrap stream pipelines with zero boilerplate.
->
-> **Built by developers who felt the pain.**  
-> *We’ve lived through the midnight outages, fragile boilerplate, and endless configuration headaches so you don't have to. Flinkboot is our free, open-source gift to the Flink community, crafted with care to make stream processing enjoyable again.*
+> **The Bootstrapping & Reliability Framework for Apache Flink.**
 
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
@@ -21,84 +18,46 @@ Flinkboot
 
 ---
 
-## What is Flinkboot?
+Flinkboot eliminates operational boilerplate and prevents runtime failures before stream pipelines reach TaskManagers:
 
-**Flinkboot** is a comprehensive, production-grade development and reliability framework designed to bootstrap, configure, and secure Apache Flink applications with **zero boilerplate**.
+- **Fail-Fast Configuration**: Validates parameters at launch (Jakarta Validation, YAML, environment variables) so misconfigured jobs never hit the cluster.
+- **Zero-Boilerplate Runtime**: Bootstraps pre-tuned `StreamExecutionEnvironment` instances (RocksDB, checkpoints, restart strategies, local Web UI) in a single call.
+- **Zero-Kryo Assertions**: Enforces POJO compliance in unit tests (`assertThat(Event.class).isPojo()`) to eliminate silent fallbacks to slow Kryo serialization.
 
-In standard Flink deployments, misconfigurations, missing parameters, state backend errors, and silent fallbacks to slow Kryo serialization often go unnoticed until runtime, leading to costly cluster failures or degraded pipeline throughput. Flinkboot eliminates these risks before your code ever reaches the TaskManagers:
+Learn more on **[flinkboot.com](https://flinkboot.com)**.
 
-### 🔴 Before
+---
 
-```java
-public static void main(String[] args) throws Exception {
-    // 1. Manual YAML parsing with Jackson (untyped tree navigation, zero validation, fails on first missing key)
-    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    JsonNode yaml = mapper.readTree(new File("job-configuration.yaml"));
-    String brokers = yaml.get("kafka").get("brokers").asText();
-    String topic = yaml.get("kafka").get("topic").asText();
-    long checkpointInterval = yaml.get("checkpoint").get("interval").asLong();
+## Quick Example
 
-    // 2. Imperative environment setup (hardcoded: adding Web UI, latency tracking, or unaligned checkpoints requires code change & redeployment)
-    StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-    env.enableCheckpointing(checkpointInterval);
-    env.getCheckpointConfig().setCheckpointTimeout(60000L);
-    env.setStateBackend(new EmbeddedRocksDBStateBackend(true));
-    env.setRestartStrategy(RestartStrategies.fixedDelayRestart(3, Time.seconds(10)));
+Declare your runtime environment in YAML:
 
-    // 3. Rigid manual connector builder (unverified OrderEvent could silently fall back to slow Kryo)
-    KafkaSource<OrderEvent> source = KafkaSource.<OrderEvent>builder()
-            .setBootstrapServers(brokers)
-            .setTopics(topic)
-            .setGroupId("order-service")
-            .setStartingOffsets(OffsetsInitializer.latest())
-            .setDeserializer(new OrderEventDeserializationSchema())
-            .build();
-
-    env.fromSource(source, WatermarkStrategy.noWatermarks(), "kafka-source").print();
-    env.execute("LegacyJob");
-
-    // ... and it would take 400+ lines of imperative boilerplate just to cover all execution environment settings
-    // (RocksDB tuning, restart strategies, unaligned checkpoints, latency metrics, savepoint restore, local web UI...)
-    // Not to mention hundreds more for multi-source YAML merging, ${ENV} interpolation, and fail-fast validation.
-}
+```yaml
+# job-configuration.yaml
+name: "StreamJob"
+environment:
+  execution:
+    parallelism: 2
+  checkpointing:
+    interval: "PT10S"
+    mode: "EXACTLY_ONCE"
+  local-web-ui:
+    enabled: true
+    port: 8080
 ```
 
-### 🟢 With Flinkboot
+Bootstrap and run your pipeline:
 
 ```java
-// 1. Build-time guarantee in unit tests: fails build if OrderEvent could fall back to slow Kryo
-@Test
-void verifyPojoCompliance() {
-    FlinkbootAssertions.assertThat(OrderEvent.class).isPojo();
-}
-
-// 2. User-defined composed configuration (record or class): assemble independent blocks like Legos
-public record AppConfiguration(
-    // 100% validated fail-fast & covers every Flink environment setting (RocksDB, restart, checkpoints...)
-    @Valid @NotNull @JsonProperty("job") JobProperties job,
-
-    // 100% validated fail-fast & exhaustively covers the connector options with raw escape hatch
-    @Valid @NotNull @JsonProperty("kafka-source") KafkaSourceProperties kafkaSource
-) {}
-
 public class MyFlinkJob {
-
     public static void main(String[] args) throws Exception {
-        // Loads & merges multi-source YAML with full fail-fast Jakarta validation (catches all errors at once)
         Flinkboot boot = Flinkboot.initialize(args);
-        AppConfiguration config = boot.configuration(AppConfiguration.class);
+        JobProperties job = boot.configuration(JobProperties.class);
 
-        // 1-line setup fully configuring RocksDB, checkpointing, restart strategy, local Web UI, and latency tracking
-        StreamExecutionEnvironment env = boot.executionEnvironment(config.job());
+        StreamExecutionEnvironment env = boot.executionEnvironment(job);
 
-        // Pre-configured, production-ready Kafka source with operator-level properties escape hatch
-        KafkaSource<OrderEvent> source = KafkaSourceFactory.supplyFor(
-            config.kafkaSource(), 
-            new OrderEventDeserializationSchema()
-        );
-
-        env.fromSource(source, WatermarkStrategy.noWatermarks(), config.kafkaSource().name()).print();
-        env.execute(config.job().name());
+        env.fromElements("Hello", "Flinkboot").print();
+        env.execute(job.name());
     }
 }
 ```
@@ -107,7 +66,8 @@ public class MyFlinkJob {
 
 ## Documentation & References
 
-* **[Documentation](https://flinkboot.com)** — Official documentation.
+* **[Documentation](https://flinkboot.com)** — Official documentation and production guides.
+* **[Quickstart Template](https://github.com/Sekelenao/Flinkboot-Quickstart)** — Standalone runnable project with simulated streams, custom configurations, and live Web UI.
 * **[Contributing Guide](CONTRIBUTING.md)** — Guidelines for reporting issues, submitting pull requests, and coding standards.
 * **[Changelog](CHANGELOG.md)** — Release notes and user-facing change history.
 
