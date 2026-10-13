@@ -18,7 +18,7 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
 - **`@JsonCreator`**: Annotate the primary constructor with `@JsonCreator`.
 - **`@JsonProperty`**: Annotate **every** parameter with `@JsonProperty("kebab-case-name")`.
 - **NO Constructor Null Checks**: Do **NOT** use `Objects.requireNonNull(...)` on constructor parameters. Allow Jackson to construct the DTO with `null` fields so that Jakarta Bean Validation (`@NotNull`, `@NotBlank`, `@NotEmpty`) can inspect the full object graph and report all missing/invalid keys simultaneously.
-- **Cross-Field Validation**: When fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`), the DTO implements `ValidatableProperties` (from `io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties`). The DTO's `validate(ConstraintValidatorContext context)` delegates in one line to a dedicated static validator in an internal package (e.g. `MyPropertiesValidator.validate(this, context)`).
+- **Cross-Field Validation**: When fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`), the DTO implements `ValidatableProperties` (from `com.flinkboot.core.api.validation.ValidatableProperties`). The DTO's `validate(ConstraintValidatorContext context)` delegates in one line to a dedicated static validator in an internal package (e.g. `MyPropertiesValidator.validate(this, context)`).
 
 ## 3. Validation Guidelines (Jakarta & Self-Validating DTOs)
 
@@ -75,7 +75,7 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
 
 ## 5. `equals()`, `hashCode()` and `toString()`
 
-- **`@Generated`**: Always annotate `equals(Object other)`, `hashCode()`, and `toString()` with `io.github.sekelenao.flinkboot.core.internal.annotation.Generated`.
+- **`@Generated`**: Always annotate `equals(Object other)`, `hashCode()`, and `toString()` with `com.flinkboot.core.internal.annotation.Generated`.
 - **`equals` Pattern**:
   - Parameter named `other` (type `Object`).
   - `if (!(other instanceof ClassName)) { return false; }`

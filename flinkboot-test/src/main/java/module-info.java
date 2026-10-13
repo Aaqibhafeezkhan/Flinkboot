@@ -1,9 +1,9 @@
-module io.github.sekelenao.flinkboot.test {
+module com.flinkboot.test {
     requires transitive org.junit.jupiter.api;
 
-    exports io.github.sekelenao.flinkboot.test.api.assertion;
-    exports io.github.sekelenao.flinkboot.test.api.assertion.type;
-    exports io.github.sekelenao.flinkboot.test.api.sink;
+    exports com.flinkboot.test.api.assertion;
+    exports com.flinkboot.test.api.assertion.type;
+    exports com.flinkboot.test.api.sink;
 
-    opens io.github.sekelenao.flinkboot.test.api.sink;
+    opens com.flinkboot.test.api.sink;
 }

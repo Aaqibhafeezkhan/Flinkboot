@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.sekelenao</groupId>
+        <groupId>com.flinkboot</groupId>
         <artifactId>flinkboot</artifactId>
         <version>0.5.0-1.20</version>
         <relativePath>../pom.xml</relativePath>
@@ -22,7 +22,7 @@
 
         <!-- Flinkboot Core -->
         <dependency>
-            <groupId>io.github.sekelenao</groupId>
+            <groupId>com.flinkboot</groupId>
             <artifactId>flinkboot-core</artifactId>
         </dependency>
 
@@ -90,7 +90,7 @@
                     <compilerArgs>
                         <arg>-Xlint:-module</arg>
                         <arg>--add-reads</arg>
-                        <arg>io.github.sekelenao.flinkboot.kafka=ALL-UNNAMED</arg>
+                        <arg>com.flinkboot.kafka=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

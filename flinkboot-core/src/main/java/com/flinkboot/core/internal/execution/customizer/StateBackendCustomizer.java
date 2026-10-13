@@ -1,0 +1,69 @@
+package com.flinkboot.core.internal.execution.customizer;
+
+import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import com.flinkboot.core.api.properties.state.CheckpointStorageType;
+import com.flinkboot.core.api.properties.state.StateBackendProperties;
+import com.flinkboot.core.api.properties.state.StateBackendType;
+import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.StateBackendOptions;
+import org.apache.flink.configuration.StateLatencyTrackOptions;
+
+import java.util.Locale;
+import java.util.Objects;
+
+public final class StateBackendCustomizer implements EnvironmentCustomizer {
+
+    private final Configuration toConfigure;
+
+    public StateBackendCustomizer(Configuration toConfigure) {
+        this.toConfigure = Objects.requireNonNull(toConfigure);
+    }
+
+    @Override
+    public void configure(ExecutionEnvironmentProperties configuration) {
+        Objects.requireNonNull(configuration);
+        configuration.stateBackend().ifPresent(this::apply);
+    }
+
+    private void apply(StateBackendProperties stateConfig) {
+        stateConfig.type().ifPresent(type -> this.applyType(type, stateConfig));
+        stateConfig.checkpointStorage().ifPresent(this::applyCheckpointStorage);
+        stateConfig.incremental().ifPresent(this::applyIncremental);
+        stateConfig.latencyTracking().ifPresent(this::applyLatencyTracking);
+    }
+
+    private void applyType(StateBackendType type, StateBackendProperties stateConfig) {
+        switch (type) {
+            case HASHMAP:
+                toConfigure.set(StateBackendOptions.STATE_BACKEND, "hashmap");
+                break;
+            case ROCKSDB:
+                toConfigure.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
+                break;
+            case CHANGELOG:
+                toConfigure.set(StateBackendOptions.STATE_BACKEND, "changelog");
+                break;
+            case CUSTOM:
+                stateConfig.customClass().ifPresent(this::applyCustomClass);
+                break;
+        }
+    }
+
+    private void applyCheckpointStorage(CheckpointStorageType checkpointStorage) {
+        var storageName = checkpointStorage.toString().toLowerCase(Locale.ROOT);
+        toConfigure.set(CheckpointingOptions.CHECKPOINT_STORAGE, storageName);
+    }
+
+    private void applyIncremental(boolean incremental) {
+        toConfigure.set(CheckpointingOptions.INCREMENTAL_CHECKPOINTS, incremental);
+    }
+
+    private void applyLatencyTracking(boolean latencyTracking) {
+        toConfigure.set(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED, latencyTracking);
+    }
+
+    private void applyCustomClass(String customClass) {
+        toConfigure.set(StateBackendOptions.STATE_BACKEND, customClass);
+    }
+}

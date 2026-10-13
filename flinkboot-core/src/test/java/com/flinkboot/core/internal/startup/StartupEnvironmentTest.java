@@ -1,0 +1,436 @@
+package com.flinkboot.core.internal.startup;
+
+import com.flinkboot.core.api.exception.parsing.BooleanParsingException;
+import com.flinkboot.core.api.exception.parsing.IntegerParsingException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@DisplayName("StartupEnvironment")
+class StartupEnvironmentTest {
+
+    @Nested
+    @DisplayName("Constructor")
+    class Constructor {
+
+        @Test
+        @DisplayName("Should initialize properly with valid args and expose parsed options")
+        void shouldInitializeWithValidArgs() {
+            var startupEnv = new StartupEnvironment(new String[]{"--my-flag", "-key", "value"});
+            assertAll(
+                () -> assertTrue(startupEnv.flag("my-flag")),
+                () -> assertEquals("value", startupEnv.get("key").orElseThrow()),
+                () -> assertEquals(List.of("classpath:job-configuration.yaml"), startupEnv.configurationResourceLocations())
+            );
+        }
+
+        @Test
+        @DisplayName("Should initialize properly with empty args array")
+        void shouldInitializeWithEmptyArgs() {
+            var startupEnv = new StartupEnvironment(new String[0]);
+            assertAll(
+                () -> assertFalse(startupEnv.flag("any-flag")),
+                () -> assertTrue(startupEnv.get("any-key").isEmpty()),
+                () -> assertEquals(List.of("classpath:job-configuration.yaml"), startupEnv.configurationResourceLocations())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when args array is null")
+        void shouldThrowExceptionWhenArgsIsNull() {
+            assertThrows(NullPointerException.class, () -> new StartupEnvironment(null));
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when CommandLine is null in testing constructor")
+        void shouldThrowExceptionWhenCommandLineIsNull() {
+            var resolver = new EnvVarResolver(System::getenv);
+            assertThrows(NullPointerException.class, () -> new StartupEnvironment(null, resolver));
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when EnvVarResolver is null in testing constructor")
+        void shouldThrowExceptionWhenEnvVarResolverIsNull() {
+            var cmd = CommandLine.parse(new String[0]);
+            assertThrows(NullPointerException.class, () -> new StartupEnvironment(cmd, null));
+        }
+    }
+
+    @Nested
+    @DisplayName("ConfigurationResourceLocation")
+    class ConfigurationResourceLocation {
+
+        @Test
+        @DisplayName("Should return CommandLine option value when option is present")
+        void shouldReturnCommandLineOptionWhenPresent() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configurations", "custom-config.yaml"});
+            var env = Map.of("FLINKBOOT_CONFIGURATIONS", "env-config.yaml");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(List.of("custom-config.yaml"), startupEnv.configurationResourceLocations());
+        }
+
+        @Test
+        @DisplayName("Should trim whitespace and filter out empty values in CommandLine option value")
+        void shouldTrimWhitespaceAndFilterEmptyValues() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configurations", "  custom-config1.yaml , , custom-config2.yaml  "});
+            var resolver = new EnvVarResolver(key -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(List.of("custom-config1.yaml", "custom-config2.yaml"), startupEnv.configurationResourceLocations());
+        }
+
+        @Test
+        @DisplayName("Should return environment variable value when option is not present but env var is set")
+        void shouldReturnEnvVarWhenCommandLineOptionAbsent() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("FLINKBOOT_CONFIGURATIONS", "env-config.yaml");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(List.of("env-config.yaml"), startupEnv.configurationResourceLocations());
+        }
+
+        @Test
+        @DisplayName("Should return default value when both option and env var are absent")
+        void shouldReturnDefaultWhenBothAbsent() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(key -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(List.of("classpath:job-configuration.yaml"), startupEnv.configurationResourceLocations());
+        }
+
+        @Test
+        @DisplayName("Should return unmodifiable list for custom configuration locations")
+        void shouldReturnUnmodifiableListForCustomLocations() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configurations", "custom-config.yaml"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var locations = startupEnv.configurationResourceLocations();
+            assertThrows(UnsupportedOperationException.class, () -> locations.add("another-config.yaml"));
+        }
+
+        @Test
+        @DisplayName("Should return unmodifiable list for default configuration location")
+        void shouldReturnUnmodifiableListForDefaultLocation() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var locations = startupEnv.configurationResourceLocations();
+            assertThrows(UnsupportedOperationException.class, () -> locations.add("another-config.yaml"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Get")
+    class Get {
+
+        @Test
+        @DisplayName("Should return parameter value from CommandLine when present")
+        void shouldReturnFromCommandLine() {
+            var cmd = CommandLine.parse(new String[]{"-key", "value"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals("value", startupEnv.get("key").orElseThrow());
+        }
+
+        @Test
+        @DisplayName("Should return parameter value from EnvVarResolver when not in CommandLine but in env")
+        void shouldReturnFromEnvVar() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("KEY", "env-value");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals("env-value", startupEnv.get("key").orElseThrow());
+        }
+
+        @Test
+        @DisplayName("Should prefer CommandLine option over EnvVarResolver")
+        void shouldPreferCommandLineOverEnv() {
+            var cmd = CommandLine.parse(new String[]{"-key", "cli-value"});
+            var env = Map.of("KEY", "env-value");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals("cli-value", startupEnv.get("key").orElseThrow());
+        }
+
+        @Test
+        @DisplayName("Should return empty Optional when key is absent everywhere")
+        void shouldReturnEmptyWhenAbsent() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertTrue(startupEnv.get("key").isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when key is null")
+        void shouldThrowExceptionWhenKeyIsNull() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var exception = assertThrows(NullPointerException.class, () -> startupEnv.get(null));
+            assertEquals("key must not be null", exception.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("Flag")
+    class Flag {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when flag is null")
+        void shouldThrowExceptionWhenFlagIsNull() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertThrows(NullPointerException.class, () -> startupEnv.flag(null));
+        }
+
+        @Test
+        @DisplayName("Should return true when flag is present in CommandLine")
+        void shouldReturnTrueWhenFlagInCommandLine() {
+            var cmd = CommandLine.parse(new String[]{"--my-flag"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertTrue(startupEnv.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should return true when flag is not in CommandLine but in EnvVarResolver as true")
+        void shouldReturnTrueWhenFlagInEnvAsTrue() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("MY_FLAG", "TrUe");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertTrue(startupEnv.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should return false when flag is not in CommandLine but in EnvVarResolver as false")
+        void shouldReturnFalseWhenFlagInEnvAsFalse() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("MY_FLAG", "false");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertFalse(startupEnv.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should return false when flag is absent everywhere")
+        void shouldReturnFalseWhenFlagAbsent() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertFalse(startupEnv.flag("my-flag"));
+        }
+        @Test
+        @DisplayName("Should throw BooleanParsingException when flag in EnvVarResolver has invalid boolean value")
+        void shouldThrowExceptionWhenFlagInEnvIsInvalid() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("MY_FLAG", "yes");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertThrows(BooleanParsingException.class, () -> startupEnv.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should short-circuit and return true when flag is in CommandLine even if env contains invalid boolean")
+        void shouldShortCircuitWhenFlagInCommandLineEvenIfEnvInvalid() {
+            var cmd = CommandLine.parse(new String[]{"--my-flag"});
+            var env = Map.of("MY_FLAG", "not-a-valid-boolean");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertTrue(startupEnv.flag("my-flag"));
+        }
+    }
+
+    @Nested
+    @DisplayName("ParserFeatures")
+    class ParserFeatures {
+
+        @Test
+        @DisplayName("Should return ParserFeatures with default values when absent")
+        void shouldReturnDefaultValuesWhenAbsent() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return permitOverride=true and listMerging=false when only override is set")
+        void shouldReturnAsymmetricFeaturesWhenOnlyOverrideIsSet() {
+            var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-override"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertTrue(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return permitOverride=false and listMerging=true when only listMerging is set")
+        void shouldReturnAsymmetricFeaturesWhenOnlyListMergingIsSet() {
+            var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-list-merging"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertTrue(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return disableValidation=true when only disableValidation is set")
+        void shouldReturnAsymmetricFeaturesWhenOnlyDisableValidationIsSet() {
+            var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-disable-validation"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return disableValidation=true when only disableValidation is set in env variables")
+        void shouldReturnAsymmetricFeaturesWhenOnlyDisableValidationIsSetInEnv() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION", "true");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return ParserFeatures with true flags and custom capacity when in CommandLine")
+        void shouldReturnCustomValuesWhenInCommandLine() {
+            var cmd = CommandLine.parse(new String[]{
+                "--flinkboot-configuration-override",
+                "--flinkboot-configuration-list-merging",
+                "--flinkboot-configuration-disable-validation",
+                "-flinkboot-configuration-violations-log-size", "25"
+            });
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertTrue(features.permitOverride()),
+                () -> assertTrue(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
+                () -> assertEquals(25, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return ParserFeatures with true flags and custom capacity when in env variables")
+        void shouldReturnCustomValuesWhenInEnv() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of(
+                "FLINKBOOT_CONFIGURATION_OVERRIDE", "true",
+                "FLINKBOOT_CONFIGURATION_LIST_MERGING", "true",
+                "FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION", "true",
+                "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE", "50"
+            );
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertTrue(features.permitOverride()),
+                () -> assertTrue(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
+                () -> assertEquals(50, features.validationCapacity())
+            );
+        }
+
+        @ParameterizedTest(name = "capacity = {0}")
+        @ValueSource(ints = {1, 10, 25, 100, Integer.MAX_VALUE})
+        @DisplayName("Should accept strictly positive validation capacity in CommandLine")
+        void shouldAcceptValidValidationCapacityInCommandLine(int capacity) {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", String.valueOf(capacity)});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(capacity, startupEnv.parserFeatures().validationCapacity());
+        }
+
+        @ParameterizedTest(name = "capacity = {0}")
+        @ValueSource(ints = {1, 10, 25, 100, Integer.MAX_VALUE})
+        @DisplayName("Should accept strictly positive validation capacity in env variables")
+        void shouldAcceptValidValidationCapacityInEnv(int capacity) {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? String.valueOf(capacity) : null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(capacity, startupEnv.parserFeatures().validationCapacity());
+        }
+
+        @Test
+        @DisplayName("Should prefer CommandLine option over EnvVarResolver for validation capacity")
+        void shouldPreferCommandLineOverEnvForValidationCapacity() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", "20"});
+            var env = Map.of("FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE", "50");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(20, startupEnv.parserFeatures().validationCapacity());
+        }
+
+        @ParameterizedTest(name = "value = \"{0}\"")
+        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", "", "2147483648"})
+        @DisplayName("Should reject invalid validation capacity in CommandLine")
+        void shouldRejectInvalidValidationCapacityInCommandLine(String size) {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", size});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var exception = assertThrows(IntegerParsingException.class, startupEnv::parserFeatures);
+            assertEquals(
+                "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
+                exception.getMessage()
+            );
+        }
+
+        @ParameterizedTest(name = "value = \"{0}\"")
+        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", "", "2147483648"})
+        @DisplayName("Should reject invalid validation capacity in env variables")
+        void shouldRejectInvalidValidationCapacityInEnv(String size) {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? size : null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var exception = assertThrows(IntegerParsingException.class, startupEnv::parserFeatures);
+            assertEquals(
+                "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
+                exception.getMessage()
+            );
+        }
+    }
+}
