@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.util.Set;
@@ -166,10 +168,30 @@ class ExecutionPropertiesTest {
             );
         }
 
-        @Test
-        @DisplayName("Should pass validation when buffer timeout is -1 millisecond")
-        void shouldPassValidationWhenBufferTimeoutIsNegativeOneMillisecond() {
-            var bufferTimeout = Duration.ofMillis(-1);
+        @ParameterizedTest
+        @ValueSource(longs = {-1, 0, 100})
+        @DisplayName("Should pass validation for valid buffer timeouts")
+        void shouldPassValidationForValidBufferTimeouts(long millis) {
+            Duration bufferTimeout = Duration.ofMillis(millis);
+
+            var config = new ExecutionProperties(
+                    ExecutionRuntimeMode.STREAMING,
+                    1,
+                    1,
+                    bufferTimeout,
+                    null,
+                    true
+            );
+
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
+        @ParameterizedTest
+        @ValueSource(longs = {-2, -10000})
+        @DisplayName("Should fail validation for invalid buffer timeouts")
+        void shouldFailValidationForInvalidBufferTimeouts(long millis) {
+            Duration bufferTimeout = Duration.ofMillis(millis);
+
             var config = new ExecutionProperties(
                     ExecutionRuntimeMode.STREAMING,
                     1,
@@ -180,59 +202,12 @@ class ExecutionPropertiesTest {
             );
 
             var violations = validator.validate(config);
-            assertAll(
-                    () -> assertTrue(violations.isEmpty()),
-                    () -> assertEquals(
-                            bufferTimeout,
-                            config.bufferTimeout().orElseThrow()
-                    )
-            );
-        }
 
-        @Test
-        @DisplayName("Should pass validation when buffer timeout is zero milliseconds")
-        void shouldPassValidationWhenBufferTimeoutIsZeroMilliseconds() {
-            var bufferTimeout = Duration.ZERO;
-            var config = new ExecutionProperties(
-                    ExecutionRuntimeMode.STREAMING,
-                    1,
-                    1,
-                    bufferTimeout,
-                    null,
-                    true
-            );
-
-            var violations = validator.validate(config);
-            assertAll(
-                    () -> assertTrue(violations.isEmpty()),
-                    () -> assertEquals(
-                            bufferTimeout,
-                            config.bufferTimeout().orElseThrow()
-                    )
-            );
-        }
-
-        @Test
-        @DisplayName("Should fail validation when buffer timeout is less than negative one millisecond")
-        void shouldFailValidationWhenBufferTimeoutIsLessThanNegativeOneMillisecond() {
-            var config = new ExecutionProperties(
-                    ExecutionRuntimeMode.STREAMING,
-                    1,
-                    1,
-                    Duration.ofMillis(-2),
-                    null,
-                    true
-            );
-
-            var violations = validator.validate(config);
             assertAll(
                     () -> assertEquals(1, violations.size()),
-                    () -> assertTrue(
-                            violations.stream().anyMatch(v ->
-                                    v.getPropertyPath().toString().equals("buffer-timeout")
-                            ),
-                            "Violation must target 'buffer-timeout'"
-                    )
+                    () -> assertTrue(violations.stream().anyMatch(v ->
+                            v.getPropertyPath().toString().equals("buffer-timeout")
+                    ), "Violation must target 'buffer-timeout'")
             );
         }
 

@@ -110,9 +110,7 @@ public final class ExecutionProperties implements ValidatableProperties, Seriali
      * @return an {@link Optional} containing the buffer timeout duration, or empty if not specified
      */
     public Optional<Duration> bufferTimeout() {
-        return Optional.ofNullable(bufferTimeout)
-                .filter(duration ->
-                        duration.equals(Duration.ofMillis(-1)) || duration.compareTo(Duration.ZERO) >= 0);
+        return Optional.ofNullable(bufferTimeout);
     }
 
     /**
