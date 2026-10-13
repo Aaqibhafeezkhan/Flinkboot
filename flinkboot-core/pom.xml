@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.github.sekelenao</groupId>
+        <groupId>com.flinkboot</groupId>
         <artifactId>flinkboot</artifactId>
         <version>0.5.0-1.20</version>
         <relativePath>../pom.xml</relativePath>
@@ -28,7 +28,7 @@
                     <compilerArgs>
                         <arg>-Xlint:-module</arg>
                         <arg>--add-reads</arg>
-                        <arg>io.github.sekelenao.flinkboot.core=ALL-UNNAMED</arg>
+                        <arg>com.flinkboot.core=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

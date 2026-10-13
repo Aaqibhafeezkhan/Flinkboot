@@ -15,6 +15,11 @@ All notable user-facing changes to this project are documented in this file.
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
+- **[namespace] Canonical Namespace Migration to `com.flinkboot`**:
+  - **Maven Coordinates**: Relocated root and all modules (`flinkboot-core`, `flinkboot-test`, `flinkboot-kafka`, `flinkboot-fluss`) from `io.github.sekelenao` to `com.flinkboot`.
+  - **Java Package Hierarchy**: Migrated all classes, records, and interfaces from `io.github.sekelenao.flinkboot.*` to `com.flinkboot.*` across all modules.
+  - **JPMS Module Descriptors**: Updated module names to `com.flinkboot.core`, `com.flinkboot.test`, `com.flinkboot.kafka`, and `com.flinkboot.fluss`.
+  - **Migration Path**: Downstream applications update their dependency `<groupId>` to `com.flinkboot` (in `pom.xml` or `build.gradle`) and replace package imports `io.github.sekelenao.flinkboot` with `com.flinkboot` (see [flinkboot.com](https://flinkboot.com) for full release notes).
 - **[flinkboot-kafka] Migration of `starting-offsets` to Nested Object**: In both YAML configuration and the Java API, `starting-offsets` is no longer a scalar value but a structured nested object requiring a `strategy` key (e.g. `starting-offsets: { strategy: EARLIEST }`). Flat configuration keys `starting-offsets-timestamp` and `starting-offsets-partition-offsets` have been removed in favor of `timestamp` and `partitions` within this nested block. In Java, flattened accessors on `KafkaSourceProperties` are replaced by `config.startingOffsets().strategy()`, `.timestamp()`, and `.partitions()`.
 
 ### 🟢 Features & Enhancements

@@ -16,12 +16,12 @@ Packages must describe business features and domain capabilities, never technica
 Each submodule (e.g. `flinkboot-core`, `flinkboot-kafka`, `flinkboot-fluss`) follows this standard structure:
 
 - **Public APIs (`*.api.*`)**:
-  - `io.github.sekelenao.flinkboot.<module>.api`: Main entry points and interfaces.
-  - `io.github.sekelenao.flinkboot.<module>.api.properties.<feature>`: Configuration properties DTOs (e.g. `source`, `sink`, `checkpointing`).
-  - `io.github.sekelenao.flinkboot.<module>.api.<feature>`: Domain factories and builders (e.g. `FlussSourceFactory`, `KafkaSinkFactory`).
-  - `io.github.sekelenao.flinkboot.<module>.api.exception`: Specific domain and configuration exceptions.
+  - `com.flinkboot.<module>.api`: Main entry points and interfaces.
+  - `com.flinkboot.<module>.api.properties.<feature>`: Configuration properties DTOs (e.g. `source`, `sink`, `checkpointing`).
+  - `com.flinkboot.<module>.api.<feature>`: Domain factories and builders (e.g. `FlussSourceFactory`, `KafkaSinkFactory`).
+  - `com.flinkboot.<module>.api.exception`: Specific domain and configuration exceptions.
 - **Internal Implementations (`*.internal.*`)**:
-  - `io.github.sekelenao.flinkboot.<module>.internal.*`: Private machinery, internal utilities, annotations (never exported to consumers in `module-info.java`).
+  - `com.flinkboot.<module>.internal.*`: Private machinery, internal utilities, annotations (never exported to consumers in `module-info.java`).
 
 ## JPMS Module Descriptor Rules (`module-info.java`)
 

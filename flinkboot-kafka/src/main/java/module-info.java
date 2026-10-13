@@ -1,16 +1,16 @@
-module io.github.sekelenao.flinkboot.kafka {
-    requires transitive io.github.sekelenao.flinkboot.core;
+module com.flinkboot.kafka {
+    requires transitive com.flinkboot.core;
     requires kafka.clients;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
     requires jakarta.validation;
 
-    exports io.github.sekelenao.flinkboot.kafka.api.properties.source;
-    exports io.github.sekelenao.flinkboot.kafka.api.properties.sink;
-    exports io.github.sekelenao.flinkboot.kafka.api.source;
-    exports io.github.sekelenao.flinkboot.kafka.api.sink;
+    exports com.flinkboot.kafka.api.properties.source;
+    exports com.flinkboot.kafka.api.properties.sink;
+    exports com.flinkboot.kafka.api.source;
+    exports com.flinkboot.kafka.api.sink;
 
-    opens io.github.sekelenao.flinkboot.kafka.api.properties.source;
-    opens io.github.sekelenao.flinkboot.kafka.api.properties.sink;
-    opens io.github.sekelenao.flinkboot.kafka.internal.validation.properties to org.junit.platform.commons;
+    opens com.flinkboot.kafka.api.properties.source;
+    opens com.flinkboot.kafka.api.properties.sink;
+    opens com.flinkboot.kafka.internal.validation.properties to org.junit.platform.commons;
 }

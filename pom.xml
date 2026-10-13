@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.sekelenao</groupId>
+    <groupId>com.flinkboot</groupId>
     <artifactId>flinkboot</artifactId>
     <version>0.5.0-1.20</version>
     <packaging>pom</packaging>
@@ -189,22 +189,22 @@
 
             <!-- Project modules -->
             <dependency>
-                <groupId>io.github.sekelenao</groupId>
+                <groupId>com.flinkboot</groupId>
                 <artifactId>flinkboot-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.sekelenao</groupId>
+                <groupId>com.flinkboot</groupId>
                 <artifactId>flinkboot-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.sekelenao</groupId>
+                <groupId>com.flinkboot</groupId>
                 <artifactId>flinkboot-fluss</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.sekelenao</groupId>
+                <groupId>com.flinkboot</groupId>
                 <artifactId>flinkboot-test</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>

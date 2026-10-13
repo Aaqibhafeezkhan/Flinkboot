@@ -2,9 +2,9 @@ package io.github.example;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
-import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
-import io.github.sekelenao.flinkboot.core.internal.validation.properties.PropertiesValidator;
+import com.flinkboot.core.api.validation.ValidatableProperties;
+import com.flinkboot.core.internal.annotation.Generated;
+import com.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
