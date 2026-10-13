@@ -202,7 +202,10 @@ class EnvironmentCustomizersTest {
 
         new ExecutionCustomizer(config).configure(envConfig);
 
-        assertFalse(config.get(ExecutionOptions.BUFFER_TIMEOUT_ENABLED));
+        assertAll(
+                () -> assertFalse(config.get(ExecutionOptions.BUFFER_TIMEOUT_ENABLED)),
+                () -> assertFalse(config.contains(ExecutionOptions.BUFFER_TIMEOUT))
+        );
     }
 
     @Test
@@ -232,6 +235,9 @@ class EnvironmentCustomizersTest {
 
         new ExecutionCustomizer(config).configure(envConfig);
 
-        assertEquals(bufferTimeout, config.get(ExecutionOptions.BUFFER_TIMEOUT));
+        assertAll(
+                () -> assertEquals(bufferTimeout, config.get(ExecutionOptions.BUFFER_TIMEOUT)),
+                () -> assertTrue(config.contains(ExecutionOptions.BUFFER_TIMEOUT))
+        );
     }
 }
