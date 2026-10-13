@@ -17,16 +17,20 @@ import io.github.sekelenao.flinkboot.core.internal.execution.customizer.Properti
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.RestartStrategyCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.SavepointRestoreCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.StateBackendCustomizer;
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
+import org.apache.flink.configuration.ExecutionOptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -170,5 +174,64 @@ class EnvironmentCustomizersTest {
             () -> assertEquals("flinkboot error", fe.getMessage()),
             () -> assertEquals(cause, fe.getCause())
         );
+    }
+
+    @Test
+    @DisplayName("Should disable buffer timeout when configured to -1 millisecond")
+    void shouldDisableBufferTimeoutWhenConfiguredToNegativeOneMillisecond() {
+        Configuration config = new Configuration();
+
+        var executionConfig = new ExecutionProperties(
+                ExecutionRuntimeMode.STREAMING,
+                null,
+                null,
+                Duration.ofMillis(-1),
+                null,
+                null
+        );
+
+        var envConfig = new ExecutionEnvironmentProperties(
+                executionConfig,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        new ExecutionCustomizer(config).configure(envConfig);
+
+        assertFalse(config.get(ExecutionOptions.BUFFER_TIMEOUT_ENABLED));
+    }
+
+    @Test
+    @DisplayName("Should apply buffer timeout when configured to a positive duration")
+    void shouldApplyPositiveBufferTimeout() {
+        Configuration config = new Configuration();
+        Duration bufferTimeout = Duration.ofMillis(100);
+
+        var executionConfig = new ExecutionProperties(
+                ExecutionRuntimeMode.STREAMING,
+                null,
+                null,
+                bufferTimeout,
+                null,
+                null
+        );
+
+        var envConfig = new ExecutionEnvironmentProperties(
+                executionConfig,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        new ExecutionCustomizer(config).configure(envConfig);
+
+        assertEquals(bufferTimeout, config.get(ExecutionOptions.BUFFER_TIMEOUT));
     }
 }

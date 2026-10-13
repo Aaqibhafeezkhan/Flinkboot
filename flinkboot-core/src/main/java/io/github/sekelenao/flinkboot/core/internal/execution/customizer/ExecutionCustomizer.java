@@ -49,7 +49,11 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyBufferTimeout(Duration bufferTimeout) {
-        toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, bufferTimeout);
+        if (bufferTimeout.equals(Duration.ofMillis(-1))) {
+            toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT_ENABLED, false);
+        } else {
+            toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, bufferTimeout);
+        }
     }
 
     private void applyAutoWatermarkInterval(Duration autoWatermarkInterval) {

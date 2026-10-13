@@ -31,7 +31,7 @@ public final class ExecutionProperties implements ValidatableProperties, Seriali
     @Positive
     private final Integer maxParallelism;
 
-    @DurationMin(millis = 0)
+    @DurationMin(millis = -1)
     private final Duration bufferTimeout;
 
     @DurationMin(millis = 0)
