@@ -28,6 +28,7 @@ All notable user-facing changes to this project are documented in this file.
 
 ### 🔵 Fixes & Diagnostics
 - **[flinkboot-core] Exponential Backoff Multiplier Validation**: Rejects `backoff-multiplier: 1.0` during configuration validation, matching Flink's requirement that the multiplier be strictly greater than `1.0`.
+- **[flinkboot-core] Buffer Timeout Maximum Throughput Support**: Allows `buffer-timeout: -1` (or `-1ms`) to disable periodic buffer flushing (`BUFFER_TIMEOUT_ENABLED = false`) for maximum throughput in streaming pipelines, resolving validation failures caused by `@DurationMin(millis = 0)`.
 
 ---
 

@@ -49,7 +49,7 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyBufferTimeout(Duration bufferTimeout) {
-        if (bufferTimeout.equals(Duration.ofMillis(-1))) {
+        if (bufferTimeout.isNegative()) {
             toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT_ENABLED, false);
         } else {
             toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, bufferTimeout);
