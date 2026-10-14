@@ -5,6 +5,8 @@ import com.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import com.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
+import org.apache.flink.api.common.serialization.DeserializationSchema;
+import java.util.function.Consumer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 
 import java.util.Objects;
@@ -88,5 +90,32 @@ public final class KafkaSourceFactory {
         KafkaRecordDeserializationSchema<T> schema
     ) {
         return supplyBuilderFor(config, schema).build();
+    }
+
+    public static <T> KafkaSourceBuilder<T> supplyBuilderFor(
+            KafkaSourceProperties config,
+            DeserializationSchema<T> schema
+    ) {
+        Objects.requireNonNull(schema, "schema must not be null");
+        return supplyBuilderFor(config, KafkaRecordDeserializationSchema.valueOnly(schema));
+    }
+
+    public static <T> KafkaSource<T> supplyFor(
+            KafkaSourceProperties config,
+            DeserializationSchema<T> schema
+    ) {
+        return supplyBuilderFor(config, schema).build();
+    }
+
+    public static <T> KafkaSource<T> supplyFor(
+            KafkaSourceProperties config,
+            DeserializationSchema<T> schema,
+            Consumer<KafkaSourceBuilder<T>> builderCustomizer
+    ) {
+        Objects.requireNonNull(builderCustomizer, "builderCustomizer must not be null");
+
+        var builder = supplyBuilderFor(config, schema);
+        builderCustomizer.accept(builder);
+        return builder.build();
     }
 }
