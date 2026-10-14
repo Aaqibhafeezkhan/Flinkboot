@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @DisplayName("KafkaSinkPropertiesValidator")
 class KafkaSinkPropertiesValidatorTest {
@@ -43,6 +45,25 @@ class KafkaSinkPropertiesValidatorTest {
     @Nested
     @DisplayName("Validation")
     class Validation {
+
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(strings = "my-prefix")
+        @DisplayName("Should skip cross-field validation when deliveryGuarantee is null")
+        void shouldPassWhenDeliveryGuaranteeIsNull(String prefix) {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSinkProperties(
+                "sink",
+                List.of("localhost:9092"),
+                "topic",
+                null,
+                prefix,
+                Map.of()
+            );
+
+            assertTrue(KafkaSinkPropertiesValidator.validate(props, context));
+            verifyNoInteractions(context);
+        }
 
         @Test
         @DisplayName("Should throw NullPointerException when properties is null")
@@ -132,7 +153,6 @@ class KafkaSinkPropertiesValidatorTest {
         }
 
         @ParameterizedTest
-        @NullSource
         @EnumSource(value = KafkaDeliveryGuarantee.class, names = "EXACTLY_ONCE", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail when non-EXACTLY_ONCE guarantee has transactionalIdPrefix")
         void shouldFailWhenNonExactlyOnceWithPrefix(KafkaDeliveryGuarantee guarantee) {
