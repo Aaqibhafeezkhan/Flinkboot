@@ -88,11 +88,11 @@ Sincere appreciation to all contributors who have shaped and strengthened this c
   <a href="https://github.com/kasapdev"><img src="https://github.com/kasapdev.png?size=64" width="64" height="64" alt="kasapdev" title="kasapdev (3 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/timothytkim"><img src="https://github.com/timothytkim.png?size=64" width="64" height="64" alt="timothytkim" title="timothytkim (3 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Aaqibhafeezkhan"><img src="https://github.com/Aaqibhafeezkhan.png?size=64" width="64" height="64" alt="Aaqibhafeezkhan" title="Aaqibhafeezkhan (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
+  <a href="https://github.com/fhenrique77"><img src="https://github.com/fhenrique77.png?size=64" width="64" height="64" alt="fhenrique77" title="fhenrique77 (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/FrodyGr"><img src="https://github.com/FrodyGr.png?size=64" width="64" height="64" alt="FrodyGr" title="FrodyGr (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Pallavi-p-h"><img src="https://github.com/Pallavi-p-h.png?size=64" width="64" height="64" alt="Pallavi-p-h" title="Pallavi-p-h (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/PHJ2000"><img src="https://github.com/PHJ2000.png?size=64" width="64" height="64" alt="PHJ2000" title="PHJ2000 (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Renan-Bacheschi"><img src="https://github.com/Renan-Bacheschi.png?size=64" width="64" height="64" alt="Renan-Bacheschi" title="Renan-Bacheschi (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
-  <a href="https://github.com/yunaremaia"><img src="https://github.com/yunaremaia.png?size=64" width="64" height="64" alt="yunaremaia" title="yunaremaia (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
 </p>
 <!-- CONTRIBUTORS-END -->
 
