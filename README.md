@@ -9,8 +9,7 @@
 </h1>
 
 <p align="center">
-  <strong>The Bootstrapping & Reliability Framework for Apache Flink.</strong><br>
-  <a href="https://flinkboot.com"><strong>flinkboot.com</strong></a>
+  <strong>The Bootstrapping & Reliability Framework for Apache Flink.</strong>
 </p>
 
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
@@ -27,6 +26,8 @@ Flinkboot eliminates operational boilerplate and prevents runtime failures befor
 - **Fail-Fast Configuration**: Validates parameters at launch (Jakarta Validation, YAML, environment variables) so misconfigured jobs never hit the cluster.
 - **Zero-Boilerplate Runtime**: Bootstraps pre-tuned `StreamExecutionEnvironment` instances (RocksDB, checkpoints, restart strategies, local Web UI) in a single call.
 - **Zero-Kryo Assertions**: Enforces POJO compliance in unit tests (`assertThat(Event.class).isPojo()`) to eliminate silent fallbacks to slow Kryo serialization.
+
+Learn more on **[flinkboot.com](https://flinkboot.com)**
 
 ---
 
