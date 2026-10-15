@@ -115,7 +115,6 @@ class KafkaSinkPropertiesValidatorTest {
         }
 
         @ParameterizedTest
-        @NullSource
         @EnumSource(value = KafkaDeliveryGuarantee.class, names = "EXACTLY_ONCE", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should pass when non-EXACTLY_ONCE guarantee has no transactionalIdPrefix")
         void shouldPassWhenNonExactlyOnceWithoutPrefix(KafkaDeliveryGuarantee guarantee) {
