@@ -1,9 +1,11 @@
 <p align="center">
-  <img src=".github/assets/icon.svg" width="200" alt="logo">
+  <a href="https://flinkboot.com">
+    <img src=".github/assets/icon.svg" width="200" alt="Flinkboot logo">
+  </a>
 </p>
 
 <h1 align="center">
-Flinkboot
+  <a href="https://flinkboot.com">Flinkboot</a>
 </h1>
 
 <p align="center">
