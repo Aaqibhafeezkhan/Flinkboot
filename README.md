@@ -6,12 +6,14 @@
 Flinkboot
 </h1>
 
-> **The Bootstrapping & Reliability Framework for Apache Flink.**
+<p align="center">
+  <strong>The Bootstrapping & Reliability Framework for Apache Flink.</strong><br>
+  <a href="https://flinkboot.com"><strong>flinkboot.com</strong></a>
+</p>
 
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=C71A36&labelColor=C71A36)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
-[![Documentation](https://img.shields.io/badge/Documentation-flinkboot.com-%230288D1.svg?logo=docusaurus&logoColor=white&color=0288D1&labelColor=0288D1)](https://flinkboot.com)
 ![Tests](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Tests.svg)
 ![Coverage](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Coverage.svg)
 ![Branches](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Branches.svg)
@@ -23,8 +25,6 @@ Flinkboot eliminates operational boilerplate and prevents runtime failures befor
 - **Fail-Fast Configuration**: Validates parameters at launch (Jakarta Validation, YAML, environment variables) so misconfigured jobs never hit the cluster.
 - **Zero-Boilerplate Runtime**: Bootstraps pre-tuned `StreamExecutionEnvironment` instances (RocksDB, checkpoints, restart strategies, local Web UI) in a single call.
 - **Zero-Kryo Assertions**: Enforces POJO compliance in unit tests (`assertThat(Event.class).isPojo()`) to eliminate silent fallbacks to slow Kryo serialization.
-
-Learn more on **[flinkboot.com](https://flinkboot.com)**.
 
 ---
 
