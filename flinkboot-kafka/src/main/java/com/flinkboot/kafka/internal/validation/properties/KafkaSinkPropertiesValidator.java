@@ -20,6 +20,9 @@ public final class KafkaSinkPropertiesValidator {
         Objects.requireNonNull(properties, "properties must not be null");
         Objects.requireNonNull(context, "context must not be null");
         var guarantee = properties.deliveryGuarantee();
+        if (guarantee == null) {
+            return true;
+        }
         var isExactlyOnce = guarantee == KafkaDeliveryGuarantee.EXACTLY_ONCE;
         var hasPrefix = properties.transactionalIdPrefix().isPresent();
 

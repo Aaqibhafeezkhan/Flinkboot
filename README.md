@@ -1,17 +1,20 @@
 <p align="center">
-  <img src=".github/assets/icon.svg" width="200" alt="logo">
+  <a href="https://flinkboot.com">
+    <img src=".github/assets/icon.svg" width="200" alt="Flinkboot logo">
+  </a>
 </p>
 
 <h1 align="center">
-Flinkboot
+  <a href="https://flinkboot.com">Flinkboot</a>
 </h1>
 
-> **The Bootstrapping & Reliability Framework for Apache Flink.**
+<p align="center">
+  <strong>The Bootstrapping & Reliability Framework for Apache Flink.</strong>
+</p>
 
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=C71A36&labelColor=C71A36)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
-[![Documentation](https://img.shields.io/badge/Documentation-flinkboot.com-%230288D1.svg?logo=docusaurus&logoColor=white&color=0288D1&labelColor=0288D1)](https://flinkboot.com)
 ![Tests](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Tests.svg)
 ![Coverage](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Coverage.svg)
 ![Branches](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Branches.svg)
@@ -24,7 +27,7 @@ Flinkboot eliminates operational boilerplate and prevents runtime failures befor
 - **Zero-Boilerplate Runtime**: Bootstraps pre-tuned `StreamExecutionEnvironment` instances (RocksDB, checkpoints, restart strategies, local Web UI) in a single call.
 - **Zero-Kryo Assertions**: Enforces POJO compliance in unit tests (`assertThat(Event.class).isPojo()`) to eliminate silent fallbacks to slow Kryo serialization.
 
-Learn more on **[flinkboot.com](https://flinkboot.com)**.
+Learn more on **[flinkboot.com](https://flinkboot.com)**
 
 ---
 
@@ -81,18 +84,18 @@ Sincere appreciation to all contributors who have shaped and strengthened this c
 
 <!-- CONTRIBUTORS-START -->
 <p align="left">
-  <a href="https://github.com/Sekelenao"><img src="https://github.com/Sekelenao.png?size=64" width="64" height="64" alt="Sekelenao" title="Sekelenao (68 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
+  <a href="https://github.com/Sekelenao"><img src="https://github.com/Sekelenao.png?size=64" width="64" height="64" alt="Sekelenao" title="Sekelenao (69 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/LouisDeconinck"><img src="https://github.com/LouisDeconinck.png?size=64" width="64" height="64" alt="LouisDeconinck" title="LouisDeconinck (8 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/be-student"><img src="https://github.com/be-student.png?size=64" width="64" height="64" alt="be-student" title="be-student (4 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/bkalika"><img src="https://github.com/bkalika.png?size=64" width="64" height="64" alt="bkalika" title="bkalika (4 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/kasapdev"><img src="https://github.com/kasapdev.png?size=64" width="64" height="64" alt="kasapdev" title="kasapdev (3 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/timothytkim"><img src="https://github.com/timothytkim.png?size=64" width="64" height="64" alt="timothytkim" title="timothytkim (3 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Aaqibhafeezkhan"><img src="https://github.com/Aaqibhafeezkhan.png?size=64" width="64" height="64" alt="Aaqibhafeezkhan" title="Aaqibhafeezkhan (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
+  <a href="https://github.com/fhenrique77"><img src="https://github.com/fhenrique77.png?size=64" width="64" height="64" alt="fhenrique77" title="fhenrique77 (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/FrodyGr"><img src="https://github.com/FrodyGr.png?size=64" width="64" height="64" alt="FrodyGr" title="FrodyGr (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Pallavi-p-h"><img src="https://github.com/Pallavi-p-h.png?size=64" width="64" height="64" alt="Pallavi-p-h" title="Pallavi-p-h (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/PHJ2000"><img src="https://github.com/PHJ2000.png?size=64" width="64" height="64" alt="PHJ2000" title="PHJ2000 (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Renan-Bacheschi"><img src="https://github.com/Renan-Bacheschi.png?size=64" width="64" height="64" alt="Renan-Bacheschi" title="Renan-Bacheschi (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
-  <a href="https://github.com/yunaremaia"><img src="https://github.com/yunaremaia.png?size=64" width="64" height="64" alt="yunaremaia" title="yunaremaia (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
 </p>
 <!-- CONTRIBUTORS-END -->
 

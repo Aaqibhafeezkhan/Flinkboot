@@ -9,6 +9,9 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,15 +145,17 @@ class KafkaSinkPropertiesTest {
             );
         }
 
-        @Test
-        @DisplayName("Should fail validation when delivery-guarantee is null")
-        void shouldFailWhenDeliveryGuaranteeIsNull() {
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(strings = "my-prefix")
+        @DisplayName("Should fail validation only on delivery-guarantee when delivery-guarantee is null")
+        void shouldFailWhenDeliveryGuaranteeIsNull(String prefix) {
             var config = new KafkaSinkProperties(
                 "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 null,
-                null,
+                prefix,
                 null
             );
 
