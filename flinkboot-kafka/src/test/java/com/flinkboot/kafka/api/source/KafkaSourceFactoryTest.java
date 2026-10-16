@@ -10,6 +10,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -20,14 +21,12 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("KafkaSourceFactory")
 class KafkaSourceFactoryTest {
@@ -310,9 +309,11 @@ class KafkaSourceFactoryTest {
         @DisplayName("Should build KafkaSource and KafkaSourceBuilder from DeserializationSchema")
         void shouldBuildFromDeserializationSchema() {
             var schema = new SimpleStringSchema();
+            var source = KafkaSourceFactory.supplyFor(config, schema);
 
             assertAll(
-                    () -> assertNotNull(KafkaSourceFactory.supplyFor(config, schema)),
+                    () -> assertNotNull(source),
+                    () -> assertEquals(Types.STRING, source.getProducedType()),
                     () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, schema))
             );
         }
@@ -320,28 +321,82 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should apply builder customizer before building KafkaSource")
         void shouldApplyBuilderCustomizer() {
-            var customizerCalled = new AtomicBoolean(false);
-
             var source = KafkaSourceFactory.supplyFor(
                     config,
                     new SimpleStringSchema(),
-                    builder -> customizerCalled.set(true)
+                    builder -> builder.setBounded(OffsetsInitializer.latest())
             );
 
             assertAll(
                     () -> assertNotNull(source),
-                    () -> assertTrue(customizerCalled.get())
+                    () -> assertEquals(Boundedness.BOUNDED, source.getBoundedness())
             );
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when DeserializationSchema or builder customizer is null")
-        void shouldThrowExceptionWhenNewParametersAreNull() {
+        @DisplayName("Should throw NullPointerException when supplyBuilderFor parameters are null")
+        void shouldThrowExceptionWhenSupplyBuilderForParametersAreNull() {
             assertAll(
                     () -> {
                         var ex = assertThrows(
                                 NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyBuilderFor(null, new SimpleStringSchema())
+                        );
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyBuilderFor(
+                                        config,
+                                        (DeserializationSchema<String>) null
+                                )
+                        );
+                        assertEquals("schema must not be null", ex.getMessage());
+                    }
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when supplyFor parameters are null")
+        void shouldThrowExceptionWhenSupplyForParametersAreNull() {
+            assertAll(
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(null, new SimpleStringSchema())
+                        );
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
                                 () -> KafkaSourceFactory.supplyFor(config, (DeserializationSchema<String>) null)
+                        );
+                        assertEquals("schema must not be null", ex.getMessage());
+                    }
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when customized supplyFor parameters are null")
+        void shouldThrowExceptionWhenCustomizedSupplyForParametersAreNull() {
+            assertAll(
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(null, new SimpleStringSchema(), builder -> { })
+                        );
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(
+                                        config,
+                                        (DeserializationSchema<String>) null,
+                                        builder -> { }
+                                )
                         );
                         assertEquals("schema must not be null", ex.getMessage());
                     },

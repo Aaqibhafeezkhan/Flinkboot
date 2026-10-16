@@ -106,6 +106,7 @@ public final class KafkaSourceFactory {
         KafkaSourceProperties config,
         DeserializationSchema<T> schema
     ) {
+        Objects.requireNonNull(config, "config must not be null");
         Objects.requireNonNull(schema, "schema must not be null");
         return supplyBuilderFor(config, KafkaRecordDeserializationSchema.valueOnly(schema));
     }
@@ -124,6 +125,8 @@ public final class KafkaSourceFactory {
         KafkaSourceProperties config,
         DeserializationSchema<T> schema
     ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(schema, "schema must not be null");
         return supplyBuilderFor(config, schema).build();
     }
 
@@ -143,6 +146,8 @@ public final class KafkaSourceFactory {
         DeserializationSchema<T> schema,
         Consumer<KafkaSourceBuilder<T>> builderCustomizer
     ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(schema, "schema must not be null");
         Objects.requireNonNull(builderCustomizer, "builderCustomizer must not be null");
 
         var builder = supplyBuilderFor(config, schema);
