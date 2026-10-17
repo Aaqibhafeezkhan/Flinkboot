@@ -11,11 +11,10 @@ Closes #
 <!-- Briefly describe what changes are introduced in this PR. -->
 
 ## Generative AI Disclosure
-<!-- Please disclose if Generative AI tools were used to write or assist with this code. -->
-- [ ] No Generative AI was used.
-- [ ] Generative AI was used (please specify tool and confirm compliance with .agents/skills/).
+<!-- Please disclose if Generative AI tools were used to write or assist with this code (specify tool and confirm compliance with .agents/skills/), or state "None". -->
 
 ## Checklist
+- [ ] The related issue has been officially accepted by a maintainer (has the `accepted` label).
 - [ ] I am officially assigned to the related issue by a maintainer.
 - [ ] My PR title follows the `#<issue_number>: <title>` format.
 - [ ] My PR description includes `Closes #<issue_number>` to automatically link and close the issue upon merge.

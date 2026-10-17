@@ -1,7 +1,7 @@
 name: "Feature or Connector Request"
 description: Suggest an idea for a new feature, improvement, or connector module
 title: "[Feature]: "
-labels: ["Feature"]
+labels: ["feature", "needs-triage"]
 body:
   - type: markdown
     attributes:
@@ -43,6 +43,6 @@ body:
     id: contribution
     attributes:
       label: Willingness to contribute
-      description: If you would like to implement this feature, check the box below and wait for a maintainer to officially assign you before opening a PR.
+      description: If you would like to implement this feature, check the box below and wait for a maintainer to officially accept and assign the issue before opening a PR.
       options:
-        - label: I would like to submit a Pull Request to implement this feature (please wait for official assignment before starting).
+        - label: I would like to submit a Pull Request to implement this feature (please wait for the issue to be accepted and assigned before starting).

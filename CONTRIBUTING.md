@@ -14,14 +14,14 @@ We are committed to providing a friendly and respectful environment for everyone
 
 ## Contribution Workflow
 
-**Every Pull Request must be linked to an existing Issue.**
+**Every Pull Request must be linked to an existing, officially accepted Issue.**
 
 1. **Find or Open an Issue**:
-   - **Work on an existing issue**: Comment on the issue to express your interest and **wait for a maintainer to officially assign you (`Assignee`)** before starting work or submitting a PR.
-   - **Propose a new change**: Open an Issue first (Bug Report, Feature Request, or Documentation) to discuss the proposal with the maintainer.
+   - **Work on an existing issue**: Only issues carrying the **`accepted`** label are validated and ready for contribution. Check the issue to ensure it is not already assigned, comment to express your interest, and **wait for a maintainer to officially assign you (`Assignee`)** before starting work or submitting a PR. Issues labeled `needs-triage` are under evaluation and must not be implemented.
+   - **Propose a new change**: Open an Issue first (Bug Report, Feature Request, or Documentation) to discuss the proposal with the maintainer. New community issues are labeled `needs-triage` until reviewed and accepted. PRs submitted on unaccepted issues will be closed.
    - **One Issue, One Assignee**: To prevent duplicated effort and race conditions, do not submit unsolicited PRs on issues that are already claimed or assigned to another contributor. PRs submitted without prior assignment may be closed in favor of the assigned contributor.
    - **Inactivity Policy**: If an assigned contributor does not provide an update or submit a PR within 7 days, the issue may be unassigned and reassigned to someone else.
-2. **Submit your PR**: Once officially assigned and aligned, create a Pull Request linking to the issue (`Closes #<issue_number>`).
+2. **Submit your PR**: Once officially assigned to an `accepted` issue, create a Pull Request linking to the issue (`Closes #<issue_number>`).
 
 ---
 
@@ -65,7 +65,7 @@ mvn clean install -DskipTests
 
 ## Submitting a Pull Request
 
-1. Ensure you are the officially assigned contributor for the issue.
+1. Ensure the linked issue is marked with the `accepted` label and you are the officially assigned contributor.
 2. Make sure `mvn clean test` passes locally (100% tests green).
 3. Update `CHANGELOG.md` if your change introduces user-facing changes (public APIs, configuration schemas, CLI options, runtime behavior, or bug fixes).
 4. Fill out the [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md), ensuring the PR title follows `#<issue_number>: <title>` and the body contains `Closes #<issue_number>`.

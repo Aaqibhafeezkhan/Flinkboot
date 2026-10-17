@@ -1,7 +1,7 @@
 name: "Bug Report"
 description: Report a reproducible defect in Flinkboot
 title: "[Bug]: "
-labels: ["Bug"]
+labels: ["bug", "needs-triage"]
 body:
   - type: markdown
     attributes:
@@ -74,6 +74,6 @@ body:
     id: contribution
     attributes:
       label: Willingness to contribute
-      description: If you would like to work on this issue, check the box below and wait for a maintainer to officially assign you before opening a PR.
+      description: If you would like to work on this issue, check the box below and wait for a maintainer to officially accept and assign the issue before opening a PR.
       options:
-        - label: I would like to submit a Pull Request to fix this issue (please wait for official assignment before starting).
+        - label: I would like to submit a Pull Request to fix this issue (please wait for the issue to be accepted and assigned before starting).
