@@ -3,6 +3,7 @@ package com.flinkboot.kafka.api.source;
 import com.flinkboot.kafka.api.properties.source.KafkaBoundedness;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
+import com.flinkboot.kafka.api.properties.source.KafkaOffsetResetStrategy;
 import com.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import com.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
@@ -106,7 +107,8 @@ class KafkaSourceFactoryTest {
             var partitionOffsets = new KafkaOffsetProperties(
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L))
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)),
+                KafkaOffsetResetStrategy.EARLIEST
             );
             var config = new KafkaSourceProperties(
                 "my-source",
@@ -266,7 +268,8 @@ class KafkaSourceFactoryTest {
             var partitionOffsets = new KafkaOffsetProperties(
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L))
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)),
+                KafkaOffsetResetStrategy.EARLIEST
             );
             var config = new KafkaSourceProperties(
                 "my-source",

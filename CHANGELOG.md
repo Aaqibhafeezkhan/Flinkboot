@@ -31,6 +31,7 @@ All notable user-facing changes to this project are documented in this file.
   - Added `boundedness: BOUNDED | UNBOUNDED` to switch Kafka ingestion between continuous streaming and Flink's native batch execution mode.
   - Added `stopping-offsets` configuration to automatically terminate ingestion upon reaching target offsets (specific timestamp, partition offsets, or current log end). Supports finite streaming when `boundedness: UNBOUNDED` and finite batch backfills when `boundedness: BOUNDED`.
 - **[flinkboot-kafka] Simplified Kafka Source Deserialization**: Added `KafkaSourceFactory` overloads accepting Flink's `DeserializationSchema<T>`, automatically adapting value-only consumers through `KafkaRecordDeserializationSchema.valueOnly(...)`. Added an optional `KafkaSourceBuilder<T>` customizer overload for inline source tuning before construction.
+- **[flinkboot-kafka] Configurable Reset Strategy for Explicit Partition Offsets (`reset-strategy`)**: Added `reset-strategy: EARLIEST | LATEST | NONE` (`KafkaOffsetResetStrategy`) to `KafkaOffsetProperties`, enforced when `strategy: OFFSETS`. Configures the underlying Flink `OffsetsInitializer.offsets(offsets, resetStrategy)` for unmapped partitions, preventing silent implicit fallback to `EARLIEST` and supporting strict failure with `NONE`.
 
 ### 🔵 Fixes & Diagnostics
 - **[flinkboot-core] Exponential Backoff Multiplier Validation**: Rejects `backoff-multiplier: 1.0` during configuration validation, matching Flink's requirement that the multiplier be strictly greater than `1.0`.

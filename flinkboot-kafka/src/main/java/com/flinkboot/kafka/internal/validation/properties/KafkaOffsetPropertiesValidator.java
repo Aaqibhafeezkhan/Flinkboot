@@ -12,10 +12,6 @@ import java.util.Objects;
  */
 public final class KafkaOffsetPropertiesValidator {
 
-    private static final String TIMESTAMP_PROPERTY = "timestamp";
-
-    private static final String PARTITIONS_PROPERTY = "partitions";
-
     private final KafkaOffsetProperties properties;
 
     private final ConstraintValidatorContext context;
@@ -34,12 +30,15 @@ public final class KafkaOffsetPropertiesValidator {
             return true;
         }
         var isTimestampValid = validateField(
-            KafkaOffsetInitializer.TIMESTAMP, properties.timestamp().isPresent(), TIMESTAMP_PROPERTY
+            KafkaOffsetInitializer.TIMESTAMP, properties.timestamp().isPresent(), "timestamp"
         );
         var arePartitionsValid = validateField(
-            KafkaOffsetInitializer.OFFSETS, !properties.partitions().isEmpty(), PARTITIONS_PROPERTY
+            KafkaOffsetInitializer.OFFSETS, !properties.partitions().isEmpty(), "partitions"
         );
-        return isTimestampValid && arePartitionsValid;
+        var isResetStrategyValid = validateField(
+            KafkaOffsetInitializer.OFFSETS, properties.resetStrategy().isPresent(), "reset-strategy"
+        );
+        return isTimestampValid && arePartitionsValid && isResetStrategyValid;
     }
 
     private boolean validateField(KafkaOffsetInitializer expectedStrategy, boolean isPresent, String propertyName) {

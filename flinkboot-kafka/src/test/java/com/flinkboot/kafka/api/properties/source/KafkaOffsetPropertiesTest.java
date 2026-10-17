@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalLong;
 
 import static jakarta.validation.Validation.buildDefaultValidatorFactory;
@@ -46,7 +47,8 @@ class KafkaOffsetPropertiesTest {
             assertAll(
                 () -> assertEquals(KafkaOffsetInitializer.EARLIEST, props.strategy()),
                 () -> assertEquals(OptionalLong.empty(), props.timestamp()),
-                () -> assertTrue(props.partitions().isEmpty())
+                () -> assertTrue(props.partitions().isEmpty()),
+                () -> assertEquals(Optional.empty(), props.resetStrategy())
             );
         }
 
@@ -58,21 +60,33 @@ class KafkaOffsetPropertiesTest {
             assertAll(
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, props.strategy()),
                 () -> assertEquals(OptionalLong.of(1689717600000L), props.timestamp()),
-                () -> assertTrue(props.partitions().isEmpty())
+                () -> assertTrue(props.partitions().isEmpty()),
+                () -> assertEquals(Optional.empty(), props.resetStrategy())
             );
         }
 
         @Test
-        @DisplayName("Should successfully construct with OFFSETS strategy and partitions")
+        @DisplayName("Should successfully construct with OFFSETS strategy, partitions, and resetStrategy")
         void shouldConstructWithOffsetsStrategy() {
             var partition = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition));
+            var props = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+            );
 
             assertAll(
                 () -> assertEquals(KafkaOffsetInitializer.OFFSETS, props.strategy()),
                 () -> assertEquals(OptionalLong.empty(), props.timestamp()),
-                () -> assertEquals(List.of(partition), props.partitions())
+                () -> assertEquals(List.of(partition), props.partitions()),
+                () -> assertEquals(Optional.of(KafkaOffsetResetStrategy.EARLIEST), props.resetStrategy())
             );
+        }
+
+        @Test
+        @DisplayName("Should construct with 3-arg constructor and empty reset strategy")
+        void shouldConstructWithThreeArgConstructor() {
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+
+            assertEquals(Optional.empty(), props.resetStrategy());
         }
 
         @Test
@@ -112,10 +126,12 @@ class KafkaOffsetPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should pass validation for OFFSETS strategy with non-empty partitions")
+        @DisplayName("Should pass validation for OFFSETS strategy with non-empty partitions and reset-strategy")
         void shouldPassForOffsetsStrategy() {
             var partition = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition));
+            var props = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+            );
             var violations = validator.validate(props);
 
             assertTrue(violations.isEmpty(), "Expected no validation violations");
@@ -181,7 +197,9 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should fail validation when OFFSETS strategy has null partitions")
         void shouldFailWhenOffsetsStrategyHasNullPartitions() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, null);
+            var props = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, null, null, KafkaOffsetResetStrategy.EARLIEST
+            );
             var violations = validator.validate(props);
 
             assertAll(
@@ -195,7 +213,9 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should fail validation when OFFSETS strategy has empty partitions")
         void shouldFailWhenOffsetsStrategyHasEmptyPartitions() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of());
+            var props = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, null, List.of(), KafkaOffsetResetStrategy.EARLIEST
+            );
             var violations = validator.validate(props);
 
             assertAll(
@@ -227,10 +247,47 @@ class KafkaOffsetPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should fail validation when OFFSETS strategy has null reset-strategy")
+        void shouldFailWhenOffsetsStrategyHasNullResetStrategy() {
+            var partition = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition), null);
+            var violations = validator.validate(props);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("reset-strategy")
+                    && v.getMessage().contains("reset-strategy is required when strategy is OFFSETS")))
+            );
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
+        @DisplayName("Should fail validation when non-OFFSETS strategy has reset-strategy specified")
+        void shouldFailWhenNonOffsetsStrategyHasResetStrategy(KafkaOffsetInitializer strategy) {
+            var props = new KafkaOffsetProperties(
+                strategy,
+                strategy == KafkaOffsetInitializer.TIMESTAMP ? 1000L : null,
+                null,
+                KafkaOffsetResetStrategy.EARLIEST
+            );
+            var violations = validator.validate(props);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("reset-strategy")
+                    && v.getMessage().contains("reset-strategy must not be specified when strategy is " + strategy)))
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when partitions contain invalid element")
         void shouldFailWhenPartitionElementIsInvalid() {
             var invalidPartition = new TopicPartitionOffsetProperties(null, 0, 100L);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(invalidPartition));
+            var props = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, null, List.of(invalidPartition), KafkaOffsetResetStrategy.EARLIEST
+            );
             var violations = validator.validate(props);
 
             assertAll(
@@ -272,9 +329,10 @@ class KafkaOffsetPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should deserialize YAML with OFFSETS strategy and partitions")
+        @DisplayName("Should deserialize YAML with OFFSETS strategy, reset-strategy, and partitions")
         void shouldDeserializeOffsetsYaml() throws Exception {
             var yaml = "strategy: OFFSETS\n"
+                + "reset-strategy: EARLIEST\n"
                 + "partitions:\n"
                 + "  - topic: topic-a\n"
                 + "    partition: 0\n"
@@ -284,6 +342,7 @@ class KafkaOffsetPropertiesTest {
             assertAll(
                 () -> assertEquals(KafkaOffsetInitializer.OFFSETS, props.strategy()),
                 () -> assertEquals(OptionalLong.empty(), props.timestamp()),
+                () -> assertEquals(Optional.of(KafkaOffsetResetStrategy.EARLIEST), props.resetStrategy()),
                 () -> assertEquals(1, props.partitions().size()),
                 () -> assertEquals("topic-a", props.partitions().get(0).topic()),
                 () -> assertEquals(0, props.partitions().get(0).partition()),
@@ -300,8 +359,12 @@ class KafkaOffsetPropertiesTest {
         @DisplayName("Should verify reflexive, symmetric equality and hashCode")
         void shouldVerifyEquality() {
             var partition = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var a = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition));
-            var b = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition));
+            var a = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+            );
+            var b = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+            );
 
             assertAll(
                 () -> assertEquals(a, a),
@@ -314,16 +377,28 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should verify inequality when fields differ")
         void shouldVerifyInequality() {
-            var a = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 100L, List.of(new TopicPartitionOffsetProperties("t", 0, 0L)));
-            var diffStrategy = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, 100L, List.of(new TopicPartitionOffsetProperties("t", 0, 0L)));
-            var diffTimestamp = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 200L, List.of(new TopicPartitionOffsetProperties("t", 0, 0L)));
+            var partition = new TopicPartitionOffsetProperties("t", 0, 0L);
+            var a = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, 100L, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+            );
+            var diffStrategy = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.TIMESTAMP, 100L, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+            );
+            var diffTimestamp = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, 200L, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+            );
             var diffPartitions = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.TIMESTAMP, 100L, List.of(new TopicPartitionOffsetProperties("t", 1, 0L)));
+                KafkaOffsetInitializer.OFFSETS, 100L, List.of(new TopicPartitionOffsetProperties("t", 1, 0L)), KafkaOffsetResetStrategy.EARLIEST
+            );
+            var diffResetStrategy = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS, 100L, List.of(partition), KafkaOffsetResetStrategy.LATEST
+            );
 
             assertAll(
                 () -> assertNotEquals(a, diffStrategy),
                 () -> assertNotEquals(a, diffTimestamp),
                 () -> assertNotEquals(a, diffPartitions),
+                () -> assertNotEquals(a, diffResetStrategy),
                 () -> assertNotEquals(a, null),
                 () -> assertNotEquals(a, "other type")
             );
@@ -337,6 +412,7 @@ class KafkaOffsetPropertiesTest {
 
             assertAll(
                 () -> assertTrue(str.contains("strategy=EARLIEST")),
+                () -> assertTrue(str.contains("resetStrategy=null")),
                 () -> assertTrue(str.contains("KafkaOffsetProperties"))
             );
         }

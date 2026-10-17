@@ -2,9 +2,13 @@ package com.flinkboot.kafka.internal;
 
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
+import com.flinkboot.kafka.api.properties.source.KafkaOffsetResetStrategy;
 import com.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -44,7 +48,9 @@ class OffsetInitializerMapperTest {
         var committedLatest = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED_LATEST, null, null);
         var timestamp = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
         var partition = new TopicPartitionOffsetProperties("test-topic", 0, 100L);
-        var offsets = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, List.of(partition));
+        var offsets = new KafkaOffsetProperties(
+            KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
+        );
 
         assertAll(
             () -> assertEquals(KafkaOffsetInitializer.EARLIEST.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(earliest)),
@@ -53,7 +59,22 @@ class OffsetInitializerMapperTest {
             () -> assertEquals(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(committedEarliest)),
             () -> assertEquals(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer().orElseThrow(), OffsetInitializerMapper.map(committedLatest)),
             () -> assertNotNull(OffsetInitializerMapper.map(timestamp)),
-            () -> assertNotNull(OffsetInitializerMapper.map(offsets))
+            () -> assertNotNull(OffsetInitializerMapper.map(offsets)),
+            () -> assertEquals(OffsetResetStrategy.EARLIEST, OffsetInitializerMapper.map(offsets).getAutoOffsetResetStrategy())
         );
+    }
+
+    @ParameterizedTest
+    @EnumSource(KafkaOffsetResetStrategy.class)
+    @DisplayName("Should map configured reset strategy for OFFSETS strategy")
+    void shouldMapConfiguredResetStrategyForOffsets(KafkaOffsetResetStrategy strategy) {
+        var partition = new TopicPartitionOffsetProperties("test-topic", 0, 100L);
+        var props = new KafkaOffsetProperties(
+            KafkaOffsetInitializer.OFFSETS, null, List.of(partition), strategy
+        );
+
+        var initializer = OffsetInitializerMapper.map(props);
+
+        assertEquals(strategy.offsetResetStrategy(), initializer.getAutoOffsetResetStrategy());
     }
 }
