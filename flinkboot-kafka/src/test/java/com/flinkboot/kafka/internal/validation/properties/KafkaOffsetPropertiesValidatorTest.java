@@ -41,7 +41,7 @@ class KafkaOffsetPropertiesValidatorTest {
         @Test
         @DisplayName("Should throw NullPointerException when context is null")
         void shouldThrowWhenContextIsNull() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
             var ex = assertThrows(
                 NullPointerException.class,
                 () -> KafkaOffsetPropertiesValidator.validate(props, null)
@@ -58,7 +58,7 @@ class KafkaOffsetPropertiesValidatorTest {
         @DisplayName("Should return true when strategy is null (delegating to Jakarta @NotNull)")
         void shouldReturnTrueWhenStrategyIsNull() {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new KafkaOffsetProperties(null, null, null);
+            var props = new KafkaOffsetProperties(null, null, null, null);
 
             assertTrue(KafkaOffsetPropertiesValidator.validate(props, context));
         }
@@ -68,7 +68,7 @@ class KafkaOffsetPropertiesValidatorTest {
         @DisplayName("Should return true for valid standard strategy without timestamp and partitions")
         void shouldReturnTrueForValidStandardStrategy(KafkaOffsetInitializer strategy) {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new KafkaOffsetProperties(strategy, null, null);
+            var props = new KafkaOffsetProperties(strategy, null, null, null);
 
             assertTrue(KafkaOffsetPropertiesValidator.validate(props, context));
         }
@@ -77,7 +77,7 @@ class KafkaOffsetPropertiesValidatorTest {
         @DisplayName("Should return false when TIMESTAMP strategy is missing timestamp")
         void shouldReturnFalseWhenTimestampStrategyIsMissingTimestamp() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, null, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, null, null, null);
 
             assertFalse(KafkaOffsetPropertiesValidator.validate(props, context));
         }
@@ -86,7 +86,7 @@ class KafkaOffsetPropertiesValidatorTest {
         @DisplayName("Should return true for valid TIMESTAMP strategy with timestamp")
         void shouldReturnTrueForValidTimestamp() {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1000L, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1000L, null, null);
 
             assertTrue(KafkaOffsetPropertiesValidator.validate(props, context));
         }
@@ -127,7 +127,7 @@ class KafkaOffsetPropertiesValidatorTest {
         @DisplayName("Should return false when standard strategy has timestamp")
         void shouldReturnFalseWhenStandardStrategyHasTimestamp(KafkaOffsetInitializer strategy) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new KafkaOffsetProperties(strategy, 1000L, null);
+            var props = new KafkaOffsetProperties(strategy, 1000L, null, null);
 
             assertFalse(KafkaOffsetPropertiesValidator.validate(props, context));
         }
@@ -138,7 +138,7 @@ class KafkaOffsetPropertiesValidatorTest {
         void shouldReturnFalseWhenStandardStrategyHasPartitions(KafkaOffsetInitializer strategy) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var partition = new TopicPartitionOffsetProperties("topic", 0, 10L);
-            var props = new KafkaOffsetProperties(strategy, null, List.of(partition));
+            var props = new KafkaOffsetProperties(strategy, null, List.of(partition), null);
 
             assertFalse(KafkaOffsetPropertiesValidator.validate(props, context));
         }

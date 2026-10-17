@@ -42,12 +42,12 @@ class OffsetInitializerMapperTest {
     @Test
     @DisplayName("Should successfully map all offset initializer strategies")
     void shouldMapAllOffsetInitializerStrategies() {
-        var earliest = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
-        var latest = new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
-        var committed = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null);
-        var committedEarliest = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED_EARLIEST, null, null);
-        var committedLatest = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED_LATEST, null, null);
-        var timestamp = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
+        var earliest = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
+        var latest = new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null);
+        var committed = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null, null);
+        var committedEarliest = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED_EARLIEST, null, null, null);
+        var committedLatest = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED_LATEST, null, null, null);
+        var timestamp = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null, null);
         var partition = new TopicPartitionOffsetProperties("test-topic", 0, 100L);
         var offsets = new KafkaOffsetProperties(
             KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST

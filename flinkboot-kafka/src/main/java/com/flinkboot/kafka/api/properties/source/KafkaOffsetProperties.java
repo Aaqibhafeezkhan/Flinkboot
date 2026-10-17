@@ -55,21 +55,6 @@ public final class KafkaOffsetProperties implements Serializable, ValidatablePro
         this.resetStrategy = resetStrategy;
     }
 
-    /**
-     * Creates a new {@code KafkaOffsetProperties} instance without reset strategy.
-     *
-     * @param strategy   offset strategy (EARLIEST, LATEST, COMMITTED, TIMESTAMP, etc.)
-     * @param timestamp  timestamp in milliseconds (required if strategy is TIMESTAMP)
-     * @param partitions partition offsets
-     */
-    public KafkaOffsetProperties(
-        KafkaOffsetInitializer strategy,
-        Long timestamp,
-        List<TopicPartitionOffsetProperties> partitions
-    ) {
-        this(strategy, timestamp, partitions, null);
-    }
-
     @Override
     public boolean validate(ConstraintValidatorContext context) {
         return KafkaOffsetPropertiesValidator.validate(this, context);
@@ -114,10 +99,7 @@ public final class KafkaOffsetProperties implements Serializable, ValidatablePro
      * @return an {@link Optional} containing the reset strategy, or empty if not specified
      */
     public Optional<KafkaOffsetResetStrategy> resetStrategy() {
-        if (resetStrategy == null) {
-            return Optional.empty();
-        }
-        return Optional.of(resetStrategy);
+        return Optional.ofNullable(resetStrategy);
     }
 
     @Override

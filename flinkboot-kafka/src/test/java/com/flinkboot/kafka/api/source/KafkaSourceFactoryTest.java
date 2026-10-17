@@ -43,10 +43,10 @@ class KafkaSourceFactoryTest {
     };
 
     private static final KafkaOffsetProperties DEFAULT_STARTING_OFFSETS =
-        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
 
     private static final KafkaOffsetProperties DEFAULT_STOPPING_OFFSETS =
-        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
+        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null);
 
     @Test
     @DisplayName("Private constructor should throw AssertionError")
@@ -85,7 +85,7 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid TIMESTAMP offset config")
         void shouldBuildWithTimestamp() {
-            var timestampOffsets = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
+            var timestampOffsets = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null, null);
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
@@ -246,7 +246,7 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid TIMESTAMP offset config")
         void shouldBuildWithTimestamp() {
-            var timestampOffsets = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
+            var timestampOffsets = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null, null);
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),

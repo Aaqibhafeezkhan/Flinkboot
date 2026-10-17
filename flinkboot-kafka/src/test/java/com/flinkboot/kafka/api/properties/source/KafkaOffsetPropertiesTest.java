@@ -42,7 +42,7 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should successfully construct with EARLIEST strategy and default empty values")
         void shouldConstructWithEarliestStrategy() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
 
             assertAll(
                 () -> assertEquals(KafkaOffsetInitializer.EARLIEST, props.strategy()),
@@ -55,7 +55,7 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should successfully construct with TIMESTAMP strategy and timestamp")
         void shouldConstructWithTimestampStrategy() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null, null);
 
             assertAll(
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, props.strategy()),
@@ -82,20 +82,12 @@ class KafkaOffsetPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should construct with 3-arg constructor and empty reset strategy")
-        void shouldConstructWithThreeArgConstructor() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
-
-            assertEquals(Optional.empty(), props.resetStrategy());
-        }
-
-        @Test
         @DisplayName("Should return unmodifiable list of partitions")
         void shouldReturnUnmodifiablePartitions() {
             var partition = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
             var partitions = new ArrayList<TopicPartitionOffsetProperties>();
             partitions.add(partition);
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, partitions);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.OFFSETS, null, partitions, KafkaOffsetResetStrategy.EARLIEST);
 
             var result = props.partitions();
             assertThrows(UnsupportedOperationException.class, () -> result.add(new TopicPartitionOffsetProperties("other", 1, 200L)));
@@ -110,7 +102,7 @@ class KafkaOffsetPropertiesTest {
         @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should pass validation for standard strategies without timestamp and partitions")
         void shouldPassForStandardStrategies(KafkaOffsetInitializer strategy) {
-            var props = new KafkaOffsetProperties(strategy, null, null);
+            var props = new KafkaOffsetProperties(strategy, null, null, null);
             var violations = validator.validate(props);
 
             assertTrue(violations.isEmpty(), "Expected no validation violations");
@@ -119,7 +111,7 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should pass validation for TIMESTAMP strategy with valid positive timestamp")
         void shouldPassForTimestampStrategy() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null, null);
             var violations = validator.validate(props);
 
             assertTrue(violations.isEmpty(), "Expected no validation violations");
@@ -140,7 +132,7 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should fail validation when strategy is null")
         void shouldFailWhenStrategyIsNull() {
-            var props = new KafkaOffsetProperties(null, null, null);
+            var props = new KafkaOffsetProperties(null, null, null, null);
             var violations = validator.validate(props);
 
             assertAll(
@@ -152,7 +144,7 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should fail validation when TIMESTAMP strategy has null timestamp")
         void shouldFailWhenTimestampStrategyHasNullTimestamp() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, null, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, null, null, null);
             var violations = validator.validate(props);
 
             assertAll(
@@ -166,7 +158,7 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should fail validation when TIMESTAMP strategy has negative timestamp")
         void shouldFailWhenTimestampStrategyHasNegativeTimestamp() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, -1L, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, -1L, null, null);
             var violations = validator.validate(props);
 
             assertAll(
@@ -235,7 +227,8 @@ class KafkaOffsetPropertiesTest {
             var props = new KafkaOffsetProperties(
                 strategy,
                 strategy == KafkaOffsetInitializer.TIMESTAMP ? 1000L : null,
-                List.of(partition)
+                List.of(partition),
+                null
             );
             var violations = validator.validate(props);
 
@@ -408,7 +401,7 @@ class KafkaOffsetPropertiesTest {
         @Test
         @DisplayName("Should produce meaningful toString output")
         void shouldProduceMeaningfulToString() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
             var str = props.toString();
 
             assertAll(
