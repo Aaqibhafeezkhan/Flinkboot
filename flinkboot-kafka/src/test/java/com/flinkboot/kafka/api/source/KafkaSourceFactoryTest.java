@@ -5,9 +5,12 @@ import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import com.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
+import org.apache.flink.api.common.serialization.DeserializationSchema;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.connector.source.Boundedness;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -245,6 +248,52 @@ class KafkaSourceFactoryTest {
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParamsAreNull() {
             var config = new KafkaSourceProperties(
+                    "my-source",
+                    List.of("localhost:9092"),
+                    "test-group",
+                    List.of("test-topic"),
+                    null,
+                    DEFAULT_STARTING_OFFSETS,
+                    null,
+                    null,
+                    null
+            );
+
+            assertAll(
+                    () -> {
+                        var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(null, TEST_SCHEMA));
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(config, (KafkaRecordDeserializationSchema<String>) null)
+                        );
+                        assertEquals("schema must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(null, TEST_SCHEMA));
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyBuilderFor(
+                                        config,
+                                        (KafkaRecordDeserializationSchema<String>) null
+                                )
+                        );
+                        assertEquals("schema must not be null", ex.getMessage());
+                    }
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("DeserializationSchema overloads")
+    class DeserializationSchemaOverloads {
+
+        private final KafkaSourceProperties config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
@@ -254,25 +303,110 @@ class KafkaSourceFactoryTest {
                 null,
                 null,
                 null
+        );
+
+        @Test
+        @DisplayName("Should build KafkaSource and KafkaSourceBuilder from DeserializationSchema")
+        void shouldBuildFromDeserializationSchema() {
+            var schema = new SimpleStringSchema();
+            var source = KafkaSourceFactory.supplyFor(config, schema);
+
+            assertAll(
+                    () -> assertNotNull(source),
+                    () -> assertEquals(Types.STRING, source.getProducedType()),
+                    () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, schema))
+            );
+        }
+
+        @Test
+        @DisplayName("Should apply builder customizer before building KafkaSource")
+        void shouldApplyBuilderCustomizer() {
+            var source = KafkaSourceFactory.supplyFor(
+                    config,
+                    new SimpleStringSchema(),
+                    builder -> builder.setBounded(OffsetsInitializer.latest())
             );
 
             assertAll(
-                () -> {
-                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(null, TEST_SCHEMA));
-                    assertEquals("config must not be null", ex.getMessage());
-                },
-                () -> {
-                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null));
-                    assertEquals("schema must not be null", ex.getMessage());
-                },
-                () -> {
-                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(null, TEST_SCHEMA));
-                    assertEquals("config must not be null", ex.getMessage());
-                },
-                () -> {
-                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null));
-                    assertEquals("schema must not be null", ex.getMessage());
-                }
+                    () -> assertNotNull(source),
+                    () -> assertEquals(Boundedness.BOUNDED, source.getBoundedness())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when supplyBuilderFor parameters are null")
+        void shouldThrowExceptionWhenSupplyBuilderForParametersAreNull() {
+            assertAll(
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyBuilderFor(null, new SimpleStringSchema())
+                        );
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyBuilderFor(
+                                        config,
+                                        (DeserializationSchema<String>) null
+                                )
+                        );
+                        assertEquals("schema must not be null", ex.getMessage());
+                    }
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when supplyFor parameters are null")
+        void shouldThrowExceptionWhenSupplyForParametersAreNull() {
+            assertAll(
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(null, new SimpleStringSchema())
+                        );
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(config, (DeserializationSchema<String>) null)
+                        );
+                        assertEquals("schema must not be null", ex.getMessage());
+                    }
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when customized supplyFor parameters are null")
+        void shouldThrowExceptionWhenCustomizedSupplyForParametersAreNull() {
+            assertAll(
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(null, new SimpleStringSchema(), builder -> { })
+                        );
+                        assertEquals("config must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(
+                                        config,
+                                        (DeserializationSchema<String>) null,
+                                        builder -> { }
+                                )
+                        );
+                        assertEquals("schema must not be null", ex.getMessage());
+                    },
+                    () -> {
+                        var ex = assertThrows(
+                                NullPointerException.class,
+                                () -> KafkaSourceFactory.supplyFor(config, new SimpleStringSchema(), null)
+                        );
+                        assertEquals("builderCustomizer must not be null", ex.getMessage());
+                    }
             );
         }
     }
