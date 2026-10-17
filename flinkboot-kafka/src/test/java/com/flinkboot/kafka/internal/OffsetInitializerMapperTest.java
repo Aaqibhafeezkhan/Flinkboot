@@ -5,6 +5,7 @@ import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetResetStrategy;
 import com.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,7 +67,7 @@ class OffsetInitializerMapperTest {
 
     @ParameterizedTest
     @EnumSource(KafkaOffsetResetStrategy.class)
-    @DisplayName("Should map configured reset strategy for OFFSETS strategy")
+    @DisplayName("Should map configured reset strategy and partition offsets for OFFSETS strategy")
     void shouldMapConfiguredResetStrategyForOffsets(KafkaOffsetResetStrategy strategy) {
         var partition = new TopicPartitionOffsetProperties("test-topic", 0, 100L);
         var props = new KafkaOffsetProperties(
@@ -74,7 +75,14 @@ class OffsetInitializerMapperTest {
         );
 
         var initializer = OffsetInitializerMapper.map(props);
+        var topicPartition = new TopicPartition("test-topic", 0);
+        var partitionOffsets = initializer.getPartitionOffsets(List.of(topicPartition), null);
 
-        assertEquals(strategy.offsetResetStrategy(), initializer.getAutoOffsetResetStrategy());
+        assertAll(
+            () -> assertNotNull(initializer),
+            () -> assertEquals(strategy.offsetResetStrategy(), initializer.getAutoOffsetResetStrategy()),
+            () -> assertNotNull(partitionOffsets),
+            () -> assertEquals(100L, partitionOffsets.get(topicPartition))
+        );
     }
 }

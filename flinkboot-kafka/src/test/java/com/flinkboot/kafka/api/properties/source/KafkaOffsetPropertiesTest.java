@@ -182,12 +182,13 @@ class KafkaOffsetPropertiesTest {
             var props = new KafkaOffsetProperties(
                 strategy,
                 1000L,
-                strategy == KafkaOffsetInitializer.OFFSETS ? List.of(new TopicPartitionOffsetProperties("t", 0, 0L)) : null
+                strategy == KafkaOffsetInitializer.OFFSETS ? List.of(new TopicPartitionOffsetProperties("t", 0, 0L)) : null,
+                strategy == KafkaOffsetInitializer.OFFSETS ? KafkaOffsetResetStrategy.EARLIEST : null
             );
             var violations = validator.validate(props);
 
             assertAll(
-                () -> assertFalse(violations.isEmpty()),
+                () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
                     v.getPropertyPath().toString().equals("timestamp")
                     && v.getMessage().contains("timestamp must not be specified when strategy is " + strategy)))

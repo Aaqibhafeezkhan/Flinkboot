@@ -148,7 +148,12 @@ class KafkaOffsetPropertiesValidatorTest {
         @DisplayName("Should return false when non-OFFSETS strategy has reset-strategy")
         void shouldReturnFalseWhenNonOffsetsStrategyHasResetStrategy(KafkaOffsetInitializer strategy) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new KafkaOffsetProperties(strategy, null, null, KafkaOffsetResetStrategy.EARLIEST);
+            var props = new KafkaOffsetProperties(
+                strategy,
+                strategy == KafkaOffsetInitializer.TIMESTAMP ? 1000L : null,
+                null,
+                KafkaOffsetResetStrategy.EARLIEST
+            );
 
             assertFalse(KafkaOffsetPropertiesValidator.validate(props, context));
         }

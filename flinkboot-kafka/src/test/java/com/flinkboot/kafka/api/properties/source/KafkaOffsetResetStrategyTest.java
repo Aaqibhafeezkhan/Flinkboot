@@ -3,9 +3,9 @@ package com.flinkboot.kafka.api.properties.source;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("KafkaOffsetResetStrategy")
@@ -15,14 +15,18 @@ class KafkaOffsetResetStrategyTest {
     @DisplayName("OffsetResetStrategy Resolution")
     class OffsetResetStrategyResolution {
 
-        @Test
+        @ParameterizedTest
+        @CsvSource({
+            "EARLIEST, EARLIEST",
+            "LATEST,   LATEST",
+            "NONE,     NONE"
+        })
         @DisplayName("Should configure correct Kafka OffsetResetStrategy mapping")
-        void shouldMapToKafkaOffsetResetStrategy() {
-            assertAll(
-                () -> assertEquals(OffsetResetStrategy.EARLIEST, KafkaOffsetResetStrategy.EARLIEST.offsetResetStrategy()),
-                () -> assertEquals(OffsetResetStrategy.LATEST, KafkaOffsetResetStrategy.LATEST.offsetResetStrategy()),
-                () -> assertEquals(OffsetResetStrategy.NONE, KafkaOffsetResetStrategy.NONE.offsetResetStrategy())
-            );
+        void shouldMapToKafkaOffsetResetStrategy(
+            KafkaOffsetResetStrategy flinkbootStrategy,
+            OffsetResetStrategy expectedKafkaStrategy
+        ) {
+            assertEquals(expectedKafkaStrategy, flinkbootStrategy.offsetResetStrategy());
         }
     }
 }
