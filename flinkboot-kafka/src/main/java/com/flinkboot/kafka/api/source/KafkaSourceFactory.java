@@ -89,6 +89,8 @@ public final class KafkaSourceFactory {
         KafkaSourceProperties config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(schema, "schema must not be null");
         return supplyBuilderFor(config, schema).build();
     }
 
