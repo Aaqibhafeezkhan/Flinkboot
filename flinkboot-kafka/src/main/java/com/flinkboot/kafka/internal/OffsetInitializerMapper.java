@@ -2,6 +2,7 @@ package com.flinkboot.kafka.internal;
 
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
+import com.flinkboot.kafka.api.properties.source.KafkaOffsetResetStrategy;
 import com.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.kafka.common.TopicPartition;
@@ -20,7 +21,7 @@ public final class OffsetInitializerMapper {
         Objects.requireNonNull(properties, "properties must not be null");
         var strategy = properties.strategy();
         if (strategy == KafkaOffsetInitializer.OFFSETS) {
-            return offsetsPerPartition(properties.partitions());
+            return offsetsPerPartition(properties.partitions(), properties.resetStrategy().orElseThrow());
         }
         if (strategy == KafkaOffsetInitializer.TIMESTAMP) {
             return OffsetsInitializer.timestamp(properties.timestamp().orElseThrow());
@@ -28,12 +29,15 @@ public final class OffsetInitializerMapper {
         return strategy.offsetsInitializer().orElseThrow();
     }
 
-    private static OffsetsInitializer offsetsPerPartition(List<TopicPartitionOffsetProperties> partitionOffsets) {
+    private static OffsetsInitializer offsetsPerPartition(
+        List<TopicPartitionOffsetProperties> partitionOffsets,
+        KafkaOffsetResetStrategy resetStrategy
+    ) {
         var offsetInitializerConfiguration = new HashMap<TopicPartition, Long>();
         for (var entry : partitionOffsets) {
             var topicPartition = new TopicPartition(entry.topic(), entry.partition());
             offsetInitializerConfiguration.put(topicPartition, entry.offset());
         }
-        return OffsetsInitializer.offsets(offsetInitializerConfiguration);
+        return OffsetsInitializer.offsets(offsetInitializerConfiguration, resetStrategy.offsetResetStrategy());
     }
 }

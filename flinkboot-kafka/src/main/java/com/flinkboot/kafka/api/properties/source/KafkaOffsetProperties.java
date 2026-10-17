@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalLong;
 
 /**
@@ -31,22 +32,27 @@ public final class KafkaOffsetProperties implements Serializable, ValidatablePro
 
     private final List<@NotNull @Valid TopicPartitionOffsetProperties> partitions;
 
+    private final KafkaOffsetResetStrategy resetStrategy;
+
     /**
      * Creates a new {@code KafkaOffsetProperties} instance.
      *
-     * @param strategy   offset strategy (EARLIEST, LATEST, COMMITTED, TIMESTAMP, OFFSETS, etc.)
-     * @param timestamp  timestamp in milliseconds (required if strategy is TIMESTAMP)
-     * @param partitions partition offsets (required if strategy is OFFSETS)
+     * @param strategy      offset strategy (EARLIEST, LATEST, COMMITTED, TIMESTAMP, OFFSETS, etc.)
+     * @param timestamp     timestamp in milliseconds (required if strategy is TIMESTAMP)
+     * @param partitions    partition offsets (required if strategy is OFFSETS)
+     * @param resetStrategy reset strategy for unassigned partitions (required if strategy is OFFSETS)
      */
     @JsonCreator
     public KafkaOffsetProperties(
         @JsonProperty("strategy") KafkaOffsetInitializer strategy,
         @JsonProperty("timestamp") Long timestamp,
-        @JsonProperty("partitions") List<TopicPartitionOffsetProperties> partitions
+        @JsonProperty("partitions") List<TopicPartitionOffsetProperties> partitions,
+        @JsonProperty("reset-strategy") KafkaOffsetResetStrategy resetStrategy
     ) {
         this.strategy = strategy;
         this.timestamp = timestamp;
         this.partitions = partitions;
+        this.resetStrategy = resetStrategy;
     }
 
     @Override
@@ -87,6 +93,15 @@ public final class KafkaOffsetProperties implements Serializable, ValidatablePro
         return Collections.unmodifiableList(partitions);
     }
 
+    /**
+     * Returns the optional reset strategy for partitions without explicit offsets.
+     *
+     * @return an {@link Optional} containing the reset strategy, or empty if not specified
+     */
+    public Optional<KafkaOffsetResetStrategy> resetStrategy() {
+        return Optional.ofNullable(resetStrategy);
+    }
+
     @Override
     @Generated
     public boolean equals(Object other) {
@@ -96,13 +111,14 @@ public final class KafkaOffsetProperties implements Serializable, ValidatablePro
         var o = (KafkaOffsetProperties) other;
         return strategy == o.strategy
             && Objects.equals(timestamp, o.timestamp)
-            && Objects.equals(partitions, o.partitions);
+            && Objects.equals(partitions, o.partitions)
+            && resetStrategy == o.resetStrategy;
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(strategy, timestamp, partitions);
+        return Objects.hash(strategy, timestamp, partitions, resetStrategy);
     }
 
     @Override
@@ -112,6 +128,7 @@ public final class KafkaOffsetProperties implements Serializable, ValidatablePro
             "strategy=" + strategy +
             ", timestamp=" + timestamp +
             ", partitions=" + partitions +
+            ", resetStrategy=" + resetStrategy +
             '}';
     }
 }
