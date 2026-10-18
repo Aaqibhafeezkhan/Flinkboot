@@ -68,6 +68,16 @@ class SavepointRestorePropertiesTest {
                 () -> assertTrue(config.restoreMode().isEmpty())
             );
         }
+
+        @Test
+        @DisplayName("Should expose only supported restore modes")
+        void shouldExposeOnlySupportedRestoreModes() {
+            assertEquals(2, RestoreMode.values().length);
+            assertAll(
+                () -> assertEquals(RestoreMode.CLAIM, RestoreMode.valueOf("CLAIM")),
+                () -> assertEquals(RestoreMode.NO_CLAIM, RestoreMode.valueOf("NO_CLAIM"))
+            );
+        }
     }
 
     @Nested
@@ -112,14 +122,14 @@ class SavepointRestorePropertiesTest {
         @Test
         @DisplayName("Should return expected values from getters")
         void testGetters() {
-            var config = new SavepointRestoreProperties("/path/to/savepoint", false, RestoreMode.LEGACY);
+            var config = new SavepointRestoreProperties("/path/to/savepoint", false, RestoreMode.NO_CLAIM);
 
             assertAll(
                 () -> assertEquals("/path/to/savepoint", config.savepointPath()),
                 () -> assertTrue(config.allowNonRestoredState().isPresent()),
                 () -> assertFalse(config.allowNonRestoredState().get()),
                 () -> assertTrue(config.restoreMode().isPresent()),
-                () -> assertEquals(RestoreMode.LEGACY, config.restoreMode().get())
+                () -> assertEquals(RestoreMode.NO_CLAIM, config.restoreMode().get())
             );
         }
     }

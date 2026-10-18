@@ -233,7 +233,7 @@ class ExecutionEnvironmentFactoryTest {
             var savepointConfig = new SavepointRestoreProperties(
                 "/tmp/savepoint-1",
                 true,
-                RestoreMode.CLAIM
+                RestoreMode.NO_CLAIM
             );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, null, savepointConfig, null, null);
             var jobConfig = new JobProperties("savepoint-job", envProps);
@@ -245,7 +245,7 @@ class ExecutionEnvironmentFactoryTest {
             assertAll(
                 () -> assertEquals("/tmp/savepoint-1", flinkConfig.get(StateRecoveryOptions.SAVEPOINT_PATH)),
                 () -> assertTrue(flinkConfig.get(StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE)),
-                () -> assertEquals("CLAIM", flinkConfig.get(StateRecoveryOptions.RESTORE_MODE).toString())
+                () -> assertEquals("NO_CLAIM", flinkConfig.get(StateRecoveryOptions.RESTORE_MODE).toString())
             );
         }
 
