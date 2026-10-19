@@ -233,7 +233,7 @@ class ExecutionEnvironmentFactoryTest {
             var savepointConfig = new SavepointRestoreProperties(
                 "/tmp/savepoint-1",
                 true,
-                RestoreMode.NO_CLAIM
+                RestoreMode.CLAIM
             );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, null, savepointConfig, null, null);
             var jobConfig = new JobProperties("savepoint-job", envProps);
