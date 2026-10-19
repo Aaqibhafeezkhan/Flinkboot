@@ -12,5 +12,4 @@ module com.flinkboot.kafka {
 
     opens com.flinkboot.kafka.api.properties.source;
     opens com.flinkboot.kafka.api.properties.sink;
-    opens com.flinkboot.kafka.internal.validation.properties to org.junit.platform.commons;
 }
