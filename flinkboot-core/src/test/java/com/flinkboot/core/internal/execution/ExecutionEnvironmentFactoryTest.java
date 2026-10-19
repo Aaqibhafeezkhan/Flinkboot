@@ -245,7 +245,7 @@ class ExecutionEnvironmentFactoryTest {
             assertAll(
                 () -> assertEquals("/tmp/savepoint-1", flinkConfig.get(StateRecoveryOptions.SAVEPOINT_PATH)),
                 () -> assertTrue(flinkConfig.get(StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE)),
-                () -> assertEquals("NO_CLAIM", flinkConfig.get(StateRecoveryOptions.RESTORE_MODE).toString())
+                () -> assertEquals("CLAIM", flinkConfig.get(StateRecoveryOptions.RESTORE_MODE).toString())
             );
         }
 
