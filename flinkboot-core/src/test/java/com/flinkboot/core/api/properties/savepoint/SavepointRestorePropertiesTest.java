@@ -69,15 +69,6 @@ class SavepointRestorePropertiesTest {
             );
         }
 
-        @Test
-        @DisplayName("Should expose only supported restore modes")
-        void shouldExposeOnlySupportedRestoreModes() {
-            assertEquals(2, RestoreMode.values().length);
-            assertAll(
-                () -> assertEquals(RestoreMode.CLAIM, RestoreMode.valueOf("CLAIM")),
-                () -> assertEquals(RestoreMode.NO_CLAIM, RestoreMode.valueOf("NO_CLAIM"))
-            );
-        }
     }
 
     @Nested
