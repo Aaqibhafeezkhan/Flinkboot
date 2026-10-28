@@ -23,10 +23,10 @@ import static org.mockito.Mockito.mock;
 class KafkaSourcePropertiesValidatorTest {
 
     private static final KafkaOffsetProperties DEFAULT_STARTING_OFFSETS =
-        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
 
     private static final KafkaOffsetProperties DEFAULT_STOPPING_OFFSETS =
-        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
+        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null);
 
     @Nested
     @DisplayName("Preconditions")

@@ -37,10 +37,10 @@ class KafkaSourcePropertiesTest {
     }
 
     private static final KafkaOffsetProperties DEFAULT_STARTING_OFFSETS =
-        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
 
     private static final KafkaOffsetProperties DEFAULT_STOPPING_OFFSETS =
-        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
+        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null);
 
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
@@ -362,7 +362,7 @@ class KafkaSourcePropertiesTest {
         @Test
         @DisplayName("Should cascade validation into startingOffsets when invalid")
         void shouldCascadeValidationIntoStartingOffsets() {
-            var invalidOffsets = new KafkaOffsetProperties(null, null, null);
+            var invalidOffsets = new KafkaOffsetProperties(null, null, null, null);
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
@@ -409,7 +409,7 @@ class KafkaSourcePropertiesTest {
         @Test
         @DisplayName("Should cascade validation into stoppingOffsets when invalid")
         void shouldCascadeValidationIntoStoppingOffsets() {
-            var invalidOffsets = new KafkaOffsetProperties(null, null, null);
+            var invalidOffsets = new KafkaOffsetProperties(null, null, null, null);
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
@@ -556,9 +556,9 @@ class KafkaSourcePropertiesTest {
             var diffGroup = new KafkaSourceProperties("source", List.of("localhost:9092"), "other-group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffTopics = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("other-topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffPattern = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), "^topic.*", DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffStart = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null), KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffStart = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null), KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
             var diffBoundedness = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.UNBOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffStop = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null), Map.of("k", "v"));
+            var diffStop = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null, null), Map.of("k", "v"));
             var diffProps = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v2"));
 
             assertAll(
