@@ -284,11 +284,10 @@ class RestartStrategyPropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals(
-                    "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy",
-                    violations.iterator().next().getMessage()
-                ),
-                () -> assertEquals("exponential-delay", violations.iterator().next().getPropertyPath().toString())
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("exponential-delay"))),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals(
+                    "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy"
+                )))
             );
         }
 
@@ -304,11 +303,10 @@ class RestartStrategyPropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals(
-                    "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy",
-                    violations.iterator().next().getMessage()
-                ),
-                () -> assertEquals("exponential-delay", violations.iterator().next().getPropertyPath().toString())
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("exponential-delay"))),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals(
+                    "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy"
+                )))
             );
         }
 
